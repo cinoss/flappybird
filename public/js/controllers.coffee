@@ -15,7 +15,7 @@ MainCtrl = ($scope,$timeout)->
 		width : 28
 		topHeight : 11
 	stage =
-		g : 250
+		g : 300
 		height : pipe.gap * 4
 		width : (pipe.distance + pipe.width) * 2
 	bird =
@@ -25,9 +25,9 @@ MainCtrl = ($scope,$timeout)->
 			y0 : stage.height/2
 			y : stage.height/2
 		v :
-			x : 10
+			x : 100
 			y : 0
-			y0 : 120
+			y0 : 130
 		# a : -3
 		screenX : pipe.distance
 	bird.radius = bird.size / 2
@@ -48,6 +48,12 @@ MainCtrl = ($scope,$timeout)->
 	# console.log(requestAnimationFrame)
 	# init()
 	startTime = (new Date()).getTime()
+	theta = (dx,dy)->
+		t = dy/(Math.abs(dx)+Math.abs(dy))
+		if t>0
+			return t * 90
+		else 
+			return 360 + t * 90
 	onFrame = ($scope,repeat)->
 		currentTime = (new Date()).getTime()
 		t = (currentTime - startTime)/1000
@@ -55,19 +61,28 @@ MainCtrl = ($scope,$timeout)->
 		# console.log(t + " y=" + bird.pos.y)
 		lastTime = currentTime
 		$('#bird').css 'top',(bird.pos.y * pixel.size - bird.radius)+'px'
+		angle =  theta(bird.v.x, bird.v.y + t *stage.g)
+		# console.log(Math.round angle)
+
+		$('#bird').css 'transform','rotate('+angle+'deg)'
+		$('#bird').css '-ms-transform','rotate('+angle+'deg)'
+		$('#bird').css '-webkit-transform','rotate('+angle+'deg)'
+
+		$('#bird').css 'top',(bird.pos.y * pixel.size - bird.radius)+'px'
 		if repeat
 			if bird.pos.y> stage.height - bird.radius
 				flap()
+				bird.pos.y0 = stage.height/2
 			requestAnimateFrame ()->
 				onFrame $scope,true
 				return
 		return
 	flap = ()->
-		if bird.pos.y > 0
+		if bird.pos.y > bird.radius
 			onFrame $scope,false
 			startTime = (new Date()).getTime()
 			bird.pos.y0 = bird.pos.y
-			console.log(startTime + " y=" + bird.pos.y0)
+			# console.log(startTime + " y=" + bird.pos.y0)
 			bird.v.y = -bird.v.y0
 	$('#stage').click flap
 	$(document).keydown (event) ->

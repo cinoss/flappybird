@@ -9,7 +9,7 @@ window.requestAnimateFrame = (function(callback) {
 })();
 
 MainCtrl = function($scope, $timeout) {
-  var bird, flap, freePairs, onFrame, pipe, pixel, stage, startTime;
+  var bird, flap, freePairs, onFrame, pipe, pixel, stage, startTime, theta;
   pipe = {
     distance: 56,
     gap: 51,
@@ -17,7 +17,7 @@ MainCtrl = function($scope, $timeout) {
     topHeight: 11
   };
   stage = {
-    g: 250,
+    g: 300,
     height: pipe.gap * 4,
     width: (pipe.distance + pipe.width) * 2
   };
@@ -29,9 +29,9 @@ MainCtrl = function($scope, $timeout) {
       y: stage.height / 2
     },
     v: {
-      x: 10,
+      x: 100,
       y: 0,
-      y0: 120
+      y0: 130
     },
     screenX: pipe.distance
   };
@@ -51,16 +51,31 @@ MainCtrl = function($scope, $timeout) {
   $('#stage').css('width', (stage.width * pixel.size) + 'px');
   freePairs = $('.pair');
   startTime = (new Date()).getTime();
+  theta = function(dx, dy) {
+    var t;
+    t = dy / (Math.abs(dx) + Math.abs(dy));
+    if (t > 0) {
+      return t * 90;
+    } else {
+      return 360 + t * 90;
+    }
+  };
   onFrame = function($scope, repeat) {
-    var currentTime, lastTime, t;
+    var angle, currentTime, lastTime, t;
     currentTime = (new Date()).getTime();
     t = (currentTime - startTime) / 1000;
     bird.pos.y = bird.pos.y0 + bird.v.y * t + 0.5 * stage.g * Math.pow(t, 2);
     lastTime = currentTime;
     $('#bird').css('top', (bird.pos.y * pixel.size - bird.radius) + 'px');
+    angle = theta(bird.v.x, bird.v.y + t * stage.g);
+    $('#bird').css('transform', 'rotate(' + angle + 'deg)');
+    $('#bird').css('-ms-transform', 'rotate(' + angle + 'deg)');
+    $('#bird').css('-webkit-transform', 'rotate(' + angle + 'deg)');
+    $('#bird').css('top', (bird.pos.y * pixel.size - bird.radius) + 'px');
     if (repeat) {
       if (bird.pos.y > stage.height - bird.radius) {
         flap();
+        bird.pos.y0 = stage.height / 2;
       }
       requestAnimateFrame(function() {
         onFrame($scope, true);
@@ -68,11 +83,10 @@ MainCtrl = function($scope, $timeout) {
     }
   };
   flap = function() {
-    if (bird.pos.y > 0) {
+    if (bird.pos.y > bird.radius) {
       onFrame($scope, false);
       startTime = (new Date()).getTime();
       bird.pos.y0 = bird.pos.y;
-      console.log(startTime + " y=" + bird.pos.y0);
       return bird.v.y = -bird.v.y0;
     }
   };
