@@ -56,6 +56,8 @@ MainCtrl = ($scope,$timeout)->
 		lastTime = currentTime
 		$('#bird').css 'top',(bird.pos.y * pixel.size - bird.radius)+'px'
 		if repeat
+			if bird.pos.y> stage.height - bird.radius
+				flap()
 			requestAnimateFrame ()->
 				onFrame $scope,true
 				return
