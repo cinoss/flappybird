@@ -10,6 +10,10 @@ window.requestAnimateFrame = (function(callback) {
 
 config = {};
 
+config.pixel = {
+  size: 3
+};
+
 config.pipe = {
   distance: 56,
   gap: 51,
@@ -28,10 +32,12 @@ config.bird = {
   size: 21,
   height: 16,
   width: 21,
+  effectiveRadius: 12 / 2,
   screenX: config.pipe.distance
 };
 
 bird = {
+  alive: true,
   score: 0,
   pos: {
     x: 0,
@@ -42,23 +48,17 @@ bird = {
   v: {
     x: 80,
     y: 0,
-    y0: 160
+    y0: -160
   }
 };
-
-config.pixel = {
-  size: 3
-};
-
-bird.radius = config.bird.size / 2;
 
 $('#bird').css('height', (config.bird.height * config.pixel.size) + 'px');
 
 $('#bird').css('width', (config.bird.width * config.pixel.size) + 'px');
 
-$('#bird').css('top', (bird.pos.y * config.pixel.size - bird.radius) + 'px');
+$('#bird').css('top', ((bird.pos.y - config.bird.height / 2) * config.pixel.size) + 'px');
 
-$('#bird').css('left', (config.bird.screenX * config.pixel.size - bird.radius) + 'px');
+$('#bird').css('left', ((config.bird.screenX - config.bird.width / 2) * config.pixel.size) + 'px');
 
 $('.pipe').css('width', (config.pipe.width * config.pixel.size) + 'px');
 
@@ -90,12 +90,12 @@ PipeManager = (function() {
   PipeManager.prototype.genPipe = function() {
     var pipe;
     pipe = {
-      y: Math.round(Math.random() * this.maxY),
+      y: Math.round(Math.random() * this.maxY + (config.stage.height - this.maxY - config.pipe.gap) / 2),
       x: this.nextX,
       score: 1,
       pair: this.freePairs.pop()
     };
-    $("#" + pipe.pair.id).css('top', (pipe.y + (config.stage.height - this.maxY - config.pipe.gap) / 2) * config.pixel.size);
+    $("#" + pipe.pair.id).css('top', pipe.y * config.pixel.size);
     this.nextX += this.step;
     return pipe;
   };
@@ -123,21 +123,25 @@ PipeManager = (function() {
     _ref = this.pipes;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       pipe = _ref[_i];
-      if (bird.pos.y < pipe.y) {
-        if (bird.pos.x <= pipe.x + config.pipe.width + config.bird.radius && bird.pos.x >= pipe.x - config.bird.radius) {
+      if (bird.pos.y <= pipe.y) {
+        if (bird.pos.x <= pipe.x + config.pipe.width + config.bird.effectiveRadius && bird.pos.x >= pipe.x - config.bird.effectiveRadius) {
+          console.log('hit 1');
           return false;
         }
       }
-      if (bird.pos.y > pipe.y + config.pipe.gap) {
-        if (bird.pos.x <= pipe.x + config.pipe.width + config.bird.radius && bird.pos.x >= pipe.x - config.bird.radius) {
+      if (bird.pos.y >= pipe.y + config.pipe.gap) {
+        if (bird.pos.x <= pipe.x + config.pipe.width + config.bird.effectiveRadius && bird.pos.x >= pipe.x - config.bird.effectiveRadius) {
+          console.log('hit 2');
           return false;
         }
       }
       if (bird.pos.x <= pipe.x + config.pipe.width && bird.pos.x >= pipe.x) {
-        if (bird.pos.y < pipe.y + config.bird.radius) {
+        if (bird.pos.y < pipe.y + config.bird.effectiveRadius) {
+          console.log('hit 3');
           return false;
         }
-        if (bird.pos.y < pipe.y + config.pipe.gap - config.bird.radius) {
+        if (bird.pos.y > pipe.y + config.pipe.gap - config.bird.effectiveRadius) {
+          console.log('hit 4');
           return false;
         }
       }
@@ -146,6 +150,7 @@ PipeManager = (function() {
         pipe.score = 0;
       }
     }
+    return true;
   };
 
   return PipeManager;
@@ -171,11 +176,13 @@ onFrame = function(repeat) {
   bird.pos.y = bird.pos.y0 + bird.v.y * t + 0.5 * config.stage.g * Math.pow(t, 2);
   bird.pos.x = bird.pos.x0 + bird.v.x * t;
   lastTime = currentTime;
-  $('#bird').css('top', (bird.pos.y * config.pixel.size - bird.radius) + 'px');
+  $('#bird').css('top', ((bird.pos.y - config.bird.height / 2) * config.pixel.size) + 'px');
   angle = theta(bird.v.x, bird.v.y + t * config.stage.g);
   pipeMan.update(bird.pos.x - config.bird.screenX);
-  if (!pipeMan.checkBird()) {
-    console.log('hit');
+  if (bird.alive && !pipeMan.checkBird()) {
+    bird.alive = false;
+    bird.v.x = 0;
+    bird.pos.x0 = bird.pos.x;
   }
   if (angle < 180 && angle > 44) {
     state = 2;
@@ -184,9 +191,9 @@ onFrame = function(repeat) {
   }
   $('#bird').css('background-position', "0px " + (state * config.bird.height * config.pixel.size) + "px");
   if (repeat) {
-    if (bird.pos.y > config.stage.height - bird.radius) {
+    if (bird.pos.y > config.stage.height - config.bird.height / 2) {
       flap();
-      bird.pos.y0 = config.stage.height - bird.radius;
+      bird.pos.y0 = config.stage.height - config.bird.height / 2;
     }
     requestAnimateFrame(function() {
       onFrame(true);
@@ -195,12 +202,12 @@ onFrame = function(repeat) {
 };
 
 flap = function() {
-  if (bird.pos.y > bird.radius) {
+  if (bird.alive && bird.pos.y > config.bird.height / 2) {
     onFrame(false);
     startTime = (new Date()).getTime();
     bird.pos.y0 = bird.pos.y;
     bird.pos.x0 = bird.pos.x;
-    return bird.v.y = -bird.v.y0;
+    return bird.v.y = bird.v.y0;
   }
 };
 
@@ -210,7 +217,7 @@ $(document).keydown(function(event) {
   return flap();
 });
 
-pipeMan = new PipeManager(1.2 * config.pipe.gap, 2 * config.stage.width, config.pipe.distance + config.pipe.width, freePairs);
+pipeMan = new PipeManager(1.2 * config.pipe.gap, 1.5 * config.stage.width, config.pipe.distance + config.pipe.width, freePairs);
 
 requestAnimateFrame(function() {
   onFrame(true);
