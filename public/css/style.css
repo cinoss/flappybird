@@ -1,0 +1,36 @@
+/*body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}*/
+
+#stage {
+	background: #00c4cd;
+	/*height: 720px;*/
+	/*width: 560px;*/
+	/*height: 360px;*/
+	/*width: 280px;*/
+	position: absolute;
+	z-index: 1;
+	overflow: hidden;
+}
+
+#bird {
+	background: #ffba00;
+	position: absolute;
+	z-index: 10;
+}
+
+.pipe {
+	background: #91ca58;
+	position: absolute;
+	z-index: 5;
+}
+.pair {
+	/*left: -1000px;*/
+	top: 40px;
+	position: absolute;
+}

@@ -1,0 +1,11 @@
+{
+    "name": "flappee",
+    "version": "1.0.0",
+    "dependencies": {
+        "angular": ">1.0.7",
+        "bootstrap": "*",
+        "angular-ui-router": "*"
+    },
+    "devDependencies": {
+    }
+}

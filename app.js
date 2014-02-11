@@ -1,14 +1,15 @@
+/* jslint node: true */
 
 /**
  * Module dependencies.
  */
-
+'use strict';
 var express = require('express');
-var routes = require('./routes');
+// var routes = require('./routes');
 var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
-
+var fs = require('fs');
 var app = express();
 
 // all environments
@@ -28,7 +29,13 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.get('/', routes.index);
+var indexHtml = fs.readFileSync('./public/index.html');
+app.get('/',function returnIndex (req,res) {
+  res.write(indexHtml);
+  res.end();
+});
+
+// app.get('/', routes.index);
 app.get('/users', user.list);
 
 http.createServer(app).listen(app.get('port'), function(){

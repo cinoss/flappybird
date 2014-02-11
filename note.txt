@@ -1,0 +1,5 @@
+khoang cach 2 ong: 56
+khoang cach ong tren duoi: 51
+kich thuoc chim : 13 x 18 => 20
+chieu cao vanh 11
+chieu cao man hinh 170
