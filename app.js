@@ -29,10 +29,22 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-var indexHtml = fs.readFileSync('./public/index.html');
+// var indexHtml = fs.readFileSync('./public/index.html');
 app.get('/',function returnIndex (req,res) {
-  res.write(indexHtml);
-  res.end();
+  // res.write(indexHtml);
+  // res.end();
+
+  fs.readFile('./public/index.html', function (err,data) {
+    if (err) {
+      res.writeHead(404);
+      res.end(JSON.stringify(err));
+      return;
+    }
+    res.writeHead(200);
+    res.end(data);
+  });
+
+
 });
 
 // app.get('/', routes.index);

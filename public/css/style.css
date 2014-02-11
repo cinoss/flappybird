@@ -22,7 +22,7 @@ a {
 	background: #ffba00;
 	position: absolute;
 	z-index: 10;
-	border-bottom: red 5px solid;
+	border-bottom: red 2px solid;
 	/*transition: transform 0.05s;*/
 	/*-webkit-transition: transform 0.05s; */
 }
@@ -33,7 +33,7 @@ a {
 	z-index: 5;
 }
 .pair {
-	/*left: -1000px;*/
+	left: -1000px;
 	top: 40px;
 	position: absolute;
 }
