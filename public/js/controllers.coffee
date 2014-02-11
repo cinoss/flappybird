@@ -128,7 +128,7 @@ $(document).keydown (event) ->
 	# if event.keyCode == 32
 		flap()
 
-pipeMan = new PipeManager 2*pipe.gap,2*(stage.width),pipe.distance+pipe.width,freePairs
+pipeMan = new PipeManager 2.5*pipe.gap,2*(stage.width),pipe.distance+pipe.width,freePairs
 
 
 requestAnimateFrame ()->
