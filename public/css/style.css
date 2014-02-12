@@ -13,6 +13,8 @@ a {
 	width: 550px !important;
 }
 #stage {
+	margin-left: auto !important;
+	margin-right: auto !important;
 	background: #4ac3ce;
 	/*height: 720px;*/
 	/*width: 560px;*/
@@ -45,6 +47,10 @@ a {
 	background-size: 100% auto;
 	position: absolute;
 	z-index: 5;
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -o-crisp-edges;
+	image-rendering: -webkit-optimize-contrast;
+	-ms-interpolation-mode: nearest-neighbor;
 }
 .pair {
 	left: -1000px;

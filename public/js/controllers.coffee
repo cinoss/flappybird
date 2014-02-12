@@ -9,7 +9,7 @@ window.requestAnimateFrame = ((callback) ->
 	)()
 config = {}
 config.pixel =
-	size : 2.5
+	size : 3
 config.pipe =
 	distance : 56
 	gap : 51
@@ -24,6 +24,7 @@ config.stage =
 	height : config.pipe.gap * 4
 	# width : (config.pipe.distance + config.pipe.width) * 2
 	width : 550/config.pixel.size
+	# width : 320/config.pixel.size
 config.bird =
 	size : 21
 	height : 16
@@ -52,37 +53,37 @@ bird.pos =
 bird.v =
 	x : 80
 	y : 0
+updateSize = () ->
+	# config.bird.height/2 = config.bird.height / 2
+	$('#bird').css('height',(config.bird.height * config.pixel.size)+'px')
+	$('#bird').css('width',(config.bird.width * config.pixel.size)+'px')
+	# $('#bird').css('background-size','url(img/birds.png)')
+	$('#bird').css('top',(config.stage.height* config.pixel.size)+'px')
+	$('#bird').css('left',((config.bird.screenX - config.bird.width/2) * config.pixel.size)+'px')
 
-# config.bird.height/2 = config.bird.height / 2
-$('#bird').css('height',(config.bird.height * config.pixel.size)+'px')
-$('#bird').css('width',(config.bird.width * config.pixel.size)+'px')
-# $('#bird').css('background-size','url(img/birds.png)')
-$('#bird').css('top',(config.stage.height* config.pixel.size)+'px')
-$('#bird').css('left',((config.bird.screenX - config.bird.width/2) * config.pixel.size)+'px')
+	$('.pipe').css('width',(config.pipe.width * config.pixel.size)+'px')
+	$('.pipe').css('height',(config.stage.height * config.pixel.size)+'px')
+	$('.pipe.up').css('top',(config.pipe.gap * config.pixel.size)+'px')
+	$('.pipe.up').css('background-position',"0px #{-config.pipe.imgHeight*config.pixel.size}px" )
+	# console.log config.pipe.imgHeight*config.pixel.size
+	$('.pipe.down').css('background-position',"0px #{(config.stage.height-config.pipe.imgHeight)*config.pixel.size}px" )
+	$('.pipe.down').css('top',-1*(config.stage.height * config.pixel.size)+'px')
+	$('#stage').css('height',(config.stage.height * config.pixel.size)+'px')
+	$('#stage').css('width',(config.stage.width * config.pixel.size)+'px')
+	$('#ground').css('height',(2*(config.stage.height-config.stage.groundY) * config.pixel.size)+'px')
+	$('#ground').css('width',(config.stage.width * config.pixel.size)+'px')
+	$('#ground').css('top',(config.stage.groundY * config.pixel.size)+'px')
+	$('#ground').css('background-size',(config.stage.groundTileWidth * config.pixel.size)+'px auto')
 
-$('.pipe').css('width',(config.pipe.width * config.pixel.size)+'px')
-$('.pipe').css('height',(config.stage.height * config.pixel.size)+'px')
-$('.pipe.up').css('top',(config.pipe.gap * config.pixel.size)+'px')
-$('.pipe.up').css('background-position',"0px #{-config.pipe.imgHeight*config.pixel.size}px" )
-# console.log config.pipe.imgHeight*config.pixel.size
-$('.pipe.down').css('background-position',"0px #{(config.stage.height-config.pipe.imgHeight)*config.pixel.size}px" )
-$('.pipe.down').css('top',-1*(config.stage.height * config.pixel.size)+'px')
-$('#stage').css('height',(config.stage.height * config.pixel.size)+'px')
-$('#stage').css('width',(config.stage.width * config.pixel.size)+'px')
-$('#ground').css('height',(2*(config.stage.height-config.stage.groundY) * config.pixel.size)+'px')
-$('#ground').css('width',(config.stage.width * config.pixel.size)+'px')
-$('#ground').css('top',(config.stage.groundY * config.pixel.size)+'px')
-$('#ground').css('background-size',(config.stage.groundTileWidth * config.pixel.size)+'px auto')
+	$('#buildings').css('height',((config.stage.buildingHeight) * config.pixel.size)+'px')
+	$('#buildings').css('width',(config.stage.width * config.pixel.size)+'px')
+	$('#buildings').css('top',((config.stage.groundY-config.stage.buildingHeight) * config.pixel.size)+'px')
+	$('#buildings').css('background-size','auto '+(config.stage.buildingHeight * config.pixel.size)+'px')
 
-$('#buildings').css('height',((config.stage.buildingHeight) * config.pixel.size)+'px')
-$('#buildings').css('width',(config.stage.width * config.pixel.size)+'px')
-$('#buildings').css('top',((config.stage.groundY-config.stage.buildingHeight) * config.pixel.size)+'px')
-$('#buildings').css('background-size','auto '+(config.stage.buildingHeight * config.pixel.size)+'px')
-
-$('#clouds').css('height',((config.stage.cloudHeight) * config.pixel.size)+'px')
-$('#clouds').css('width',(config.stage.width * config.pixel.size)+'px')
-$('#clouds').css('top',((config.stage.groundY-config.stage.buildingHeight-config.stage.cloudHeight) * config.pixel.size)+'px')
-$('#clouds').css('background-size','auto '+(config.stage.cloudHeight * config.pixel.size)+'px')
+	$('#clouds').css('height',((config.stage.cloudHeight) * config.pixel.size)+'px')
+	$('#clouds').css('width',(config.stage.width * config.pixel.size)+'px')
+	$('#clouds').css('top',((config.stage.groundY-config.stage.buildingHeight-config.stage.cloudHeight) * config.pixel.size)+'px')
+	$('#clouds').css('background-size','auto '+(config.stage.cloudHeight * config.pixel.size)+'px')
 
 
 # init()
@@ -194,6 +195,7 @@ start = () ->
 
 
 reset = () ->
+	updateSize()
 	window.bigbang = (new Date()).getTime()
 	window.bird.alive = true
 	window.bird.score = 0
@@ -224,7 +226,11 @@ onFrame = (repeat)->
 	angle =  theta(bird.v.x, bird.v.y + t *config.stage.g)
 	# console.log(Math.round angle)
 	pipeMan.update(bird.pos.x - config.bird.screenX)
+	oldScore = bird.score
 	if bird.alive and not pipeMan.checkBird()
+		if bird.pos.y < config.stage.groundY - config.bird.effectiveRadius
+			fallSound.play()
+		hitSound.play()
 		window.startTime = (new Date()).getTime()
 		bird.alive = false
 		# console.log 'hit'
@@ -232,8 +238,9 @@ onFrame = (repeat)->
 		bird.pos.y0 = bird.pos.y
 		bird.pos.x0 = bird.pos.x
 		bird.v.y = config.bird.v.y0/2
-
 		# bird.v.y = bird.v.y + t *config.stage.g (config.bird.v.y0/100)
+	if oldScore < bird.score
+		scoreSound.play()		
 	$('#bird').css 'transform',"rotate(#{angle}deg)"
 	$('#bird').css '-ms-transform',"rotate(#{angle}deg)"
 	$('#bird').css '-webkit-transform',"rotate(#{angle}deg)"
@@ -262,6 +269,8 @@ onFrame = (repeat)->
 	return
 flap = ()->
 	if bird.alive and bird.pos.y > config.bird.height/2
+		console.log  flapSound
+		flapSound.play()
 		onFrame false
 		window.startTime = (new Date()).getTime()
 		bird.pos.y0 = bird.pos.y
@@ -275,3 +284,16 @@ reset()
 
 
 # 	return
+soundManager.setup
+	url: '/lib/soundmanager2/soundmanager2.swf',
+	onready: () ->
+		window.flapSound = soundManager.createSound
+			url: '/audio/flap.mp3'
+		window.hitSound = soundManager.createSound
+			url: '/audio/hit.mp3'
+		window.fallSound = soundManager.createSound
+			url: '/audio/fall.mp3'
+		window.scoreSound = soundManager.createSound
+			url: '/audio/score.mp3'
+
+
