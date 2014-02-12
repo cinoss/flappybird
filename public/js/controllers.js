@@ -86,6 +86,7 @@ updateSize = function() {
   $('.pipe.up').css('background-position', "0px " + (-config.pipe.imgHeight * config.pixel.size) + "px");
   $('.pipe.down').css('background-position', "0px " + ((config.stage.height - config.pipe.imgHeight) * config.pixel.size) + "px");
   $('.pipe.down').css('top', -1 * (config.stage.height * config.pixel.size) + 'px');
+  $('#stage').css('border', config.pixel.size + 'px black solid');
   $('#stage').css('height', (config.stage.height * config.pixel.size) + 'px');
   $('#stage').css('width', (config.stage.width * config.pixel.size) + 'px');
   $('#ground').css('height', (2 * (config.stage.height - config.stage.groundY) * config.pixel.size) + 'px');
@@ -103,7 +104,12 @@ updateSize = function() {
   $('#score').css('width', (config.stage.width * config.pixel.size) + 'px');
   $('#score').css('top', ((config.stage.height - config.stage.groundY) * config.pixel.size) + 'px');
   $('#score').css('font-size', config.bird.size * config.pixel.size);
-  return $('#score').text(bird.score);
+  $('#score').text(bird.score);
+  $('#score').css('text-shadow', "-" + config.pixel.size + "px -" + config.pixel.size + "px 0 #000,  		" + config.pixel.size + "px -" + config.pixel.size + "px 0 #000,		-" + config.pixel.size + "px " + config.pixel.size + "px 0 #000,		" + config.pixel.size + "px " + config.pixel.size + "px 0 #000	");
+  $('#get-ready').css('width', (config.stage.width * config.pixel.size) + 'px');
+  $('#get-ready').css('top', (2 * (config.stage.height - config.stage.groundY) * config.pixel.size) + 'px');
+  $('#get-ready').css('font-size', config.bird.size * config.pixel.size);
+  return $('#get-ready').css('display', 'inherit');
 };
 
 PipeManager = (function() {
@@ -231,6 +237,7 @@ start = function() {
   window.status = 'playing';
   freePairs = $.makeArray($('.pair'));
   $('.pair').css("left", -config.pipe.width * config.pixel.size);
+  $('#get-ready').css('display', 'none');
   window.pipeMan = new PipeManager(1.5 * config.stage.width, config.pipe.distance + config.pipe.width, freePairs);
   flap();
   return requestAnimateFrame(function() {
