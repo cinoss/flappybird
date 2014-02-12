@@ -99,7 +99,11 @@ updateSize = function() {
   $('#clouds').css('height', (config.stage.cloudHeight * config.pixel.size) + 'px');
   $('#clouds').css('width', (config.stage.width * config.pixel.size) + 'px');
   $('#clouds').css('top', ((config.stage.groundY - config.stage.buildingHeight - config.stage.cloudHeight) * config.pixel.size) + 'px');
-  return $('#clouds').css('background-size', 'auto ' + (config.stage.cloudHeight * config.pixel.size) + 'px');
+  $('#clouds').css('background-size', 'auto ' + (config.stage.cloudHeight * config.pixel.size) + 'px');
+  $('#score').css('width', (config.stage.width * config.pixel.size) + 'px');
+  $('#score').css('top', ((config.stage.height - config.stage.groundY) * config.pixel.size) + 'px');
+  $('#score').css('font-size', config.bird.size * config.pixel.size);
+  return $('#score').text(bird.score);
 };
 
 PipeManager = (function() {
@@ -285,6 +289,7 @@ onFrame = function(repeat) {
     bird.v.y = config.bird.v.y0 / 2;
   }
   if (oldScore < bird.score) {
+    $('#score').text(bird.score);
     scoreSound.play();
   }
   $('#bird').css('transform', "rotate(" + angle + "deg)");

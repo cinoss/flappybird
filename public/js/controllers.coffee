@@ -86,6 +86,10 @@ updateSize = () ->
 	$('#clouds').css('top',((config.stage.groundY-config.stage.buildingHeight-config.stage.cloudHeight) * config.pixel.size)+'px')
 	$('#clouds').css('background-size','auto '+(config.stage.cloudHeight * config.pixel.size)+'px')
 
+	$('#score').css('width',(config.stage.width * config.pixel.size)+'px')
+	$('#score').css('top',((config.stage.height-config.stage.groundY) * config.pixel.size)+'px')
+	$('#score').css('font-size',config.bird.size * config.pixel.size);
+	$('#score').text(bird.score);
 
 # init()
 
@@ -243,6 +247,7 @@ onFrame = (repeat)->
 		bird.v.y = config.bird.v.y0/2
 		# bird.v.y = bird.v.y + t *config.stage.g (config.bird.v.y0/100)
 	if oldScore < bird.score
+		$('#score').text(bird.score);
 		scoreSound.play()		
 	$('#bird').css 'transform',"rotate(#{angle}deg)"
 	$('#bird').css '-ms-transform',"rotate(#{angle}deg)"

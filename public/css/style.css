@@ -18,7 +18,24 @@ body {
 	padding: 0px 0px;
 }
 #score {
-	z-index: 10;
+	text-align:center;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	position: absolute;
+	z-index: 12 !important;
+
+	color: white;
+	text-shadow:
+		-5px -5px 0 #000,  
+		/*10px 10px 0 #000,  */
+		5px -5px 0 #000,
+		-5px 5px 0 #000,
+		5px 5px 0 #000;
+
 }
 #stage {
 	margin-left: auto !important;
