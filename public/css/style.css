@@ -1,16 +1,24 @@
-/*body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+body {
+  font-family: "04B_19__", "Lucida Console", Monaco, monospace;
+}
+@font-face {
+	font-family: "04B_19__";
+	src: url(../font/04B_19__.woff);
+	/*src: url(../font/04B_19__.ttf);*/
 }
 
-a {
+/*a {
   color: #00B7FF;
-}*/
-
+}
+*/
 .container {
 	margin-left: auto !important;
 	margin-right: auto !important;
 	width: 550px !important;
+	padding: 0px 0px;
+}
+#score {
+	z-index: 10;
 }
 #stage {
 	margin-left: auto !important;

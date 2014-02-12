@@ -39,8 +39,9 @@ config.stage.groundY = config.stage.gapMax + (config.stage.height - config.stage
 
 #config for speed
 ratio = 1
-config.stage.g = 500 * ratio
-# bird.v.x = 80 * ratio
+config.stage.g = 600 * ratio
+config.bird.v.x0 = 70 * ratio
+config.bird.v.x0 = config.pipe.distance *1.5* ratio
 config.bird.v.y0 = -180 * ratio
 bird = {}
 bird.alive = true
@@ -51,7 +52,7 @@ bird.pos =
 	y0 : config.stage.height/2
 	y : config.stage.height/2
 bird.v =
-	x : 80
+	x : config.bird.v.x0
 	y : 0
 updateSize = () ->
 	# config.bird.height/2 = config.bird.height / 2
@@ -152,10 +153,10 @@ theta = (dx,dy)->
 	if t>0
 		return t * 90
 	else 
-		return 360 + t * 30 
+		return 360 + t * 15
 
 onIntroFrame = ()->
-	# console.log "....."
+	console.log window.status
 	unless status == 'intro'
 		return
 	currentTime = (new Date()).getTime()
@@ -205,11 +206,13 @@ reset = () ->
 		y0 : config.stage.height/2
 		y : config.stage.height/2
 	window.bird.v =
-		x : 80
+		x : config.bird.v.x0
 		y : 0
 	$('#stage').mousedown start
 	$(document).keydown start
 	window.status = 'intro'
+	console.log window.status
+	console.log '111'
 	requestAnimateFrame ()->
 		onIntroFrame()
 		return
