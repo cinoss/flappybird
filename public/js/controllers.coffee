@@ -21,7 +21,7 @@ config.stage =
 	groundTileWidth : 12
 	buildingHeight : 33
 	cloudHeight : 13
-	height : config.pipe.gap * 4
+	height : config.pipe.gap * 4.5
 	# width : (config.pipe.distance + config.pipe.width) * 2
 	width : 550/config.pixel.size
 	# width : 320/config.pixel.size
@@ -34,15 +34,15 @@ config.bird =
 	v : 
 		x0 : 80
 		y0 : -180
-config.stage.gapMax = 1.2 * config.pipe.gap
+config.stage.gapMax = 1.7 * config.pipe.gap
 config.stage.groundY = config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2 + config.pipe.gap + 2 * config.pipe.topHeight
 
 #config for speed
 ratio = 1
-config.stage.g = 600 * ratio
-config.bird.v.x0 = 70 * ratio
+config.stage.g = 650 * ratio
+config.bird.v.x0 = 60 * ratio
 config.bird.v.x0 = config.pipe.distance *1.5* ratio
-config.bird.v.y0 = -180 * ratio
+config.bird.v.y0 = -195
 bird = {}
 bird.alive = true
 bird.score = 0
@@ -97,10 +97,12 @@ updateSize = () ->
 		-#{config.pixel.size}px #{config.pixel.size}px 0 #000,
 		#{config.pixel.size}px #{config.pixel.size}px 0 #000
 	")
-	$('#get-ready').css('width',(config.stage.width * config.pixel.size)+'px')
-	$('#get-ready').css('top',(2*(config.stage.height-config.stage.groundY) * config.pixel.size)+'px')
-	$('#get-ready').css('font-size',config.bird.size * config.pixel.size);
+	$('.big-text').css('width',(config.stage.width * config.pixel.size)+'px')
+	$('.big-text').css('top',(2*(config.stage.height-config.stage.groundY) * config.pixel.size)+'px')
+	$('.big-text').css('font-size',config.bird.size * config.pixel.size);
 	$('#get-ready').css('display','inherit');
+	$('#score').css('display','inherit');
+	$('#game-over').css('display','none');
 
 # init()
 
@@ -110,7 +112,7 @@ class PipeManager
 
 	genPipe : () ->
 		pipe =
-			y : Math.round Math.random()*config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2
+			y : Math.random()*config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2
 			x : @nextX
 			score : 1
 			pair : @freePairs.pop()
@@ -180,6 +182,10 @@ onIntroFrame = ()->
 	groundState = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)
 	$('#ground').css 'background-position', groundState+"px 0px"
 
+	# buildingState = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)/4
+	# $('#buildings').css 'background-position', buildingState+"px 0px"
+	# $('#clouds').css 'background-position', buildingState+"px 0px"
+
 	wingState = Math.round((currentTime-bigbang)/150)%3
 	$('#bird').css 'background-position', "0px #{wingState*config.bird.height*config.pixel.size}px"
 
@@ -243,14 +249,12 @@ onFrame = (repeat)->
 	bird.pos.x = bird.pos.x0 + bird.v.x * t
 	# console.log(t + " y=" + bird.pos.y)
 	$('#bird').css 'top',((bird.pos.y  - config.bird.height/2)* config.pixel.size)+'px'
-	angle =  theta(bird.v.x, bird.v.y + t *config.stage.g)
-	# console.log(Math.round angle)
 	pipeMan.update(bird.pos.x - config.bird.screenX)
 	oldScore = bird.score
 	if bird.alive and not pipeMan.checkBird()
 		if bird.pos.y < config.stage.groundY - config.bird.effectiveRadius
 			fallSound.play()
-		hitSound.play()
+			hitSound.play()
 		window.startTime = (new Date()).getTime()
 		bird.alive = false
 		# console.log 'hit'
@@ -262,9 +266,11 @@ onFrame = (repeat)->
 	if oldScore < bird.score
 		$('#score').text(bird.score);
 		scoreSound.play()		
+	angle =  theta(bird.v.x, bird.v.y + t *config.stage.g)
 	$('#bird').css 'transform',"rotate(#{angle}deg)"
 	$('#bird').css '-ms-transform',"rotate(#{angle}deg)"
 	$('#bird').css '-webkit-transform',"rotate(#{angle}deg)"
+
 	if angle < 180 and angle > 44
 		wingState = 2
 	else
@@ -275,9 +281,10 @@ onFrame = (repeat)->
 	# groundState = Math.round(bird.pos.x) % config.stage.groundTileWidth
 	if bird.alive
 		groundState = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)
-		# console.log groundState
-		# groundState = -bird.pos.x*config.pixel.size
 		$('#ground').css 'background-position', groundState+"px 0px"
+		# buildingState = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)/4
+		# $('#buildings').css 'background-position', buildingState+"px 0px"
+		# $('#clouds').css 'background-position', buildingState+"px 0px"
 
 	# $('#bird').css 'top',((bird.pos.y  - config.bird.height/2)* config.pixel.size)+'px'
 	if repeat 
@@ -287,6 +294,8 @@ onFrame = (repeat)->
 				return
 		else
 			# chuyen pha
+			window.status = 'gameover'
+			gameOver()
 	return
 flap = ()->
 	if bird.alive and bird.pos.y > config.bird.height/2
@@ -298,6 +307,13 @@ flap = ()->
 		bird.pos.x0 = bird.pos.x
 		# console.log(startTime + " y=" + bird.pos.y0)
 		bird.v.y = config.bird.v.y0
+gameOver = () ->
+	hitSound.play()
+	$('#get-ready').css('display','none');
+	$('#game-over').css('display','inherit');
+	$('#score').css('display','none');
+
+
 
 reset()
 # MainCtrl = ($scope,$timeout)-> 
