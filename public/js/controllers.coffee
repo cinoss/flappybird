@@ -22,8 +22,8 @@ config.stage =
 	buildingHeight : 33
 	cloudHeight : 13
 	height : config.pipe.gap * 4
-	width : (config.pipe.distance + config.pipe.width) * 2
-	# width : 720/config.pixel
+	# width : (config.pipe.distance + config.pipe.width) * 2
+	width : 550/config.pixel.size
 config.bird =
 	size : 21
 	height : 16
@@ -47,7 +47,7 @@ config.stage.gapMax = 1.2 * config.pipe.gap
 config.stage.groundY = config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2 + config.pipe.gap + 2 * config.pipe.topHeight
 
 #config for speed
-ratio = 1.05
+ratio = 1
 config.stage.g = 500 * ratio
 # bird.v.x = 80 * ratio
 bird.v.y0 = -180 * ratio
@@ -140,7 +140,7 @@ class PipeManager
 			if bird.pos.x > pipe.x
 				bird.score += pipe.score
 				pipe.score = 0
-		if bird.pos.y > config.stage.groundY - config.bird.effectiveRadius
+		if bird.pos.y >= config.stage.groundY - config.bird.effectiveRadius
 			console.log 'hit-ground'
 			return false
 		return true
@@ -158,8 +158,8 @@ onFrame = (repeat)->
 	currentTime = (new Date()).getTime()
 	t = (currentTime - startTime)/1000
 	bird.pos.y = bird.pos.y0 + bird.v.y * t + 0.5 * config.stage.g * Math.pow(t, 2)
-	if bird.pos.y > config.stage.groundY - config.bird.effectiveRadius/2
-		bird.pos.y = config.stage.groundY - config.bird.effectiveRadius/2
+	if bird.pos.y > config.stage.groundY - config.bird.effectiveRadius
+		bird.pos.y = config.stage.groundY - config.bird.effectiveRadius
 	bird.pos.x = bird.pos.x0 + bird.v.x * t
 	# console.log(t + " y=" + bird.pos.y)
 	lastTime = currentTime
@@ -192,13 +192,13 @@ onFrame = (repeat)->
 	$('#ground').css 'background-position', groundState+"px 0px"
 
 	# $('#bird').css 'top',((bird.pos.y  - config.bird.height/2)* config.pixel.size)+'px'
-	if repeat and (bird.alive or bird.pos.y < config.stage.groundY - config.bird.effectiveRadius)
-		# if bird.pos.y>= config.stage.groundY - config.bird.height/2
-		# 	flap()
-		# 	bird.pos.y0 = config.stage.height- config.bird.height/2
-		requestAnimateFrame ()->
-			onFrame true
-			return
+	if repeat 
+		if bird.alive or bird.pos.y < config.stage.groundY - config.bird.effectiveRadius
+			requestAnimateFrame ()->
+				onFrame true
+				return
+		else
+			# chuyen pha
 	return
 flap = ()->
 	if bird.alive and bird.pos.y > config.bird.height/2

@@ -28,7 +28,7 @@ config.stage = {
   buildingHeight: 33,
   cloudHeight: 13,
   height: config.pipe.gap * 4,
-  width: (config.pipe.distance + config.pipe.width) * 2
+  width: 550 / config.pixel.size
 };
 
 config.bird = {
@@ -60,7 +60,7 @@ config.stage.gapMax = 1.2 * config.pipe.gap;
 
 config.stage.groundY = config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap) / 2 + config.pipe.gap + 2 * config.pipe.topHeight;
 
-ratio = 1.05;
+ratio = 1;
 
 config.stage.g = 500 * ratio;
 
@@ -187,7 +187,7 @@ PipeManager = (function() {
         pipe.score = 0;
       }
     }
-    if (bird.pos.y > config.stage.groundY - config.bird.effectiveRadius) {
+    if (bird.pos.y >= config.stage.groundY - config.bird.effectiveRadius) {
       console.log('hit-ground');
       return false;
     }
@@ -215,8 +215,8 @@ onFrame = function(repeat) {
   currentTime = (new Date()).getTime();
   t = (currentTime - startTime) / 1000;
   bird.pos.y = bird.pos.y0 + bird.v.y * t + 0.5 * config.stage.g * Math.pow(t, 2);
-  if (bird.pos.y > config.stage.groundY - config.bird.effectiveRadius / 2) {
-    bird.pos.y = config.stage.groundY - config.bird.effectiveRadius / 2;
+  if (bird.pos.y > config.stage.groundY - config.bird.effectiveRadius) {
+    bird.pos.y = config.stage.groundY - config.bird.effectiveRadius;
   }
   bird.pos.x = bird.pos.x0 + bird.v.x * t;
   lastTime = currentTime;
@@ -242,10 +242,14 @@ onFrame = function(repeat) {
   $('#bird').css('background-position', "0px " + (state * config.bird.height * config.pixel.size) + "px");
   groundState = -bird.pos.x * config.pixel.size;
   $('#ground').css('background-position', groundState + "px 0px");
-  if (repeat && (bird.alive || bird.pos.y < config.stage.groundY - config.bird.effectiveRadius)) {
-    requestAnimateFrame(function() {
-      onFrame(true);
-    });
+  if (repeat) {
+    if (bird.alive || bird.pos.y < config.stage.groundY - config.bird.effectiveRadius) {
+      requestAnimateFrame(function() {
+        onFrame(true);
+      });
+    } else {
+
+    }
   }
 };
 
