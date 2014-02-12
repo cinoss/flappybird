@@ -181,15 +181,18 @@ onFrame = (repeat)->
 	$('#bird').css '-ms-transform',"rotate(#{angle}deg)"
 	$('#bird').css '-webkit-transform',"rotate(#{angle}deg)"
 	if angle < 180 and angle > 44
-		state = 2
+		wingState = 2
 	else
-		state = Math.round((currentTime-bigbang)/60)%3
+		wingState = Math.round((currentTime-bigbang)/60)%3
 
-	$('#bird').css 'background-position', "0px #{state*config.bird.height*config.pixel.size}px"
+	$('#bird').css 'background-position', "0px #{wingState*config.bird.height*config.pixel.size}px"
 
 	# groundState = Math.round(bird.pos.x) % config.stage.groundTileWidth
-	groundState = -bird.pos.x*config.pixel.size
-	$('#ground').css 'background-position', groundState+"px 0px"
+	if bird.alive
+		groundState = -(currentTime-bigbang)/1000 * (bird.v.x0*config.pixel.size)
+		# console.log groundState
+		# groundState = -bird.pos.x*config.pixel.size
+		$('#ground').css 'background-position', groundState+"px 0px"
 
 	# $('#bird').css 'top',((bird.pos.y  - config.bird.height/2)* config.pixel.size)+'px'
 	if repeat 

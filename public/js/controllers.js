@@ -211,7 +211,7 @@ theta = function(dx, dy) {
 };
 
 onFrame = function(repeat) {
-  var angle, currentTime, groundState, lastTime, state, t;
+  var angle, currentTime, groundState, lastTime, t, wingState;
   currentTime = (new Date()).getTime();
   t = (currentTime - startTime) / 1000;
   bird.pos.y = bird.pos.y0 + bird.v.y * t + 0.5 * config.stage.g * Math.pow(t, 2);
@@ -235,13 +235,15 @@ onFrame = function(repeat) {
   $('#bird').css('-ms-transform', "rotate(" + angle + "deg)");
   $('#bird').css('-webkit-transform', "rotate(" + angle + "deg)");
   if (angle < 180 && angle > 44) {
-    state = 2;
+    wingState = 2;
   } else {
-    state = Math.round((currentTime - bigbang) / 60) % 3;
+    wingState = Math.round((currentTime - bigbang) / 60) % 3;
   }
-  $('#bird').css('background-position', "0px " + (state * config.bird.height * config.pixel.size) + "px");
-  groundState = -bird.pos.x * config.pixel.size;
-  $('#ground').css('background-position', groundState + "px 0px");
+  $('#bird').css('background-position', "0px " + (wingState * config.bird.height * config.pixel.size) + "px");
+  if (bird.alive) {
+    groundState = -(currentTime - bigbang) / 1000 * (bird.v.x0 * config.pixel.size);
+    $('#ground').css('background-position', groundState + "px 0px");
+  }
   if (repeat) {
     if (bird.alive || bird.pos.y < config.stage.groundY - config.bird.effectiveRadius) {
       requestAnimateFrame(function() {
