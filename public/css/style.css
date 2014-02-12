@@ -1,5 +1,6 @@
 body {
   font-family: "04B_19__", "Lucida Console", Monaco, monospace;
+  /*background: url(../img/background.png);*/
 }
 @font-face {
 	font-family: "04B_19__";
@@ -29,12 +30,70 @@ body {
 	z-index: 12 !important;
 
 	color: white;
+
+}
+#game-over {
+	color: #ffa24a;
 	text-shadow:
-		-5px -5px 0 #000,  
-		/*10px 10px 0 #000,  */
-		5px -5px 0 #000,
-		-5px 5px 0 #000,
-		5px 5px 0 #000;
+		0px 2px 0 #e76118,
+		-5px -5px 0 white,  
+		7px -5px 0 white,
+		-5px 7px 0 white,
+		7px 7px 0 white,
+
+		-5px 0px 0 white,  
+		7px 0px 0 white,
+		0px -5px 0 white,
+		0px 7px 0 white,
+
+		-7px 0px 0 #523842,  
+		9px 0px 0 #523842,
+		0px -7px 0 #523842,
+		0px 9px 0 #523842,
+
+		-7px -7px 0 #523842,  
+		9px -7px 0 #523842,
+		-7px 9px 0 #523842,
+		9px 9px 0 #523842;
+}
+#get-ready {
+	color: #5adb5a;
+	text-shadow:
+		0px 2px 0 #00aa4a,
+		-5px -5px 0 white,  
+		7px -5px 0 white,
+		-5px 7px 0 white,
+		7px 7px 0 white,
+
+		-5px 0px 0 white,  
+		7px 0px 0 white,
+		0px -5px 0 white,
+		0px 7px 0 white,
+
+		-7px 0px 0 #523842,  
+		9px 0px 0 #523842,
+		0px -7px 0 #523842,
+		0px 9px 0 #523842,
+
+		-7px -7px 0 #523842,  
+		9px -7px 0 #523842,
+		-7px 9px 0 #523842,
+		9px 9px 0 #523842;
+}
+.big-text {
+	text-align:center;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	position: absolute;
+	z-index: 12 !important;
+
+	color: #5adb5a;
+	text-shadow:
+
 
 }
 #stage {
