@@ -18,14 +18,16 @@ config.pipe =
 	imgHeight : 140
 config.stage =
 	g : 500
+	groundTileWidth : 12
+	buildingHeight : 33
 	height : config.pipe.gap * 4
 	width : (config.pipe.distance + config.pipe.width) * 2
-	# width : 1024/config.pixel
+	# width : 720/config.pixel
 config.bird =
 	size : 21
 	height : 16
 	width : 21
-	effectiveRadius : 12/2
+	effectiveRadius : 16/2
 	screenX : config.pipe.distance
 bird =
 	alive : true
@@ -39,6 +41,8 @@ bird =
 		x : 80
 		y : 0
 		y0 : -160
+config.stage.gapMax = 1.2 * config.pipe.gap
+config.stage.groundY = config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2 + config.pipe.gap + 2 * config.pipe.topHeight
 # config.bird.height/2 = config.bird.height / 2
 $('#bird').css('height',(config.bird.height * config.pixel.size)+'px')
 $('#bird').css('width',(config.bird.width * config.pixel.size)+'px')
@@ -55,20 +59,31 @@ $('.pipe.down').css('background-position',"0px #{(config.stage.height-config.pip
 $('.pipe.down').css('top',-1*(config.stage.height * config.pixel.size)+'px')
 $('#stage').css('height',(config.stage.height * config.pixel.size)+'px')
 $('#stage').css('width',(config.stage.width * config.pixel.size)+'px')
+$('#ground').css('height',(2*(config.stage.height-config.stage.groundY) * config.pixel.size)+'px')
+$('#ground').css('width',(config.stage.width * config.pixel.size)+'px')
+$('#ground').css('top',(config.stage.groundY * config.pixel.size)+'px')
+$('#ground').css('background-size',(config.stage.groundTileWidth * config.pixel.size)+'px auto')
+
+$('#buildings').css('height',((config.stage.buildingHeight) * config.pixel.size)+'px')
+$('#buildings').css('width',(config.stage.width * config.pixel.size)+'px')
+$('#buildings').css('top',((config.stage.groundY-config.stage.buildingHeight) * config.pixel.size)+'px')
+$('#buildings').css('background-size','auto '+(config.stage.buildingHeight * config.pixel.size)+'px')
+
+
 freePairs = $.makeArray($('.pair'))
 # init()
 
 class PipeManager
-	constructor: (@maxY, @nextX, @step, @freePairs) ->
+	constructor: (@nextX, @step, @freePairs) ->
 		@pipes = []
 
 	genPipe : () ->
 		pipe =
-			y : Math.round Math.random()*@maxY + (config.stage.height - @maxY - config.pipe.gap)/2
+			y : Math.round Math.random()*config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2
 			x : @nextX
 			score : 1
 			pair : @freePairs.pop()
-		# $("##{pipe.pair.id}").css('top',(pipe.y+(config.stage.height-@maxY-config.pipe.gap)/2)*config.pixel.size )
+		# $("##{pipe.pair.id}").css('top',(pipe.y+(config.stage.height-config.stage.gapMax-config.pipe.gap)/2)*config.pixel.size )
 		$("##{pipe.pair.id}").css('top',(pipe.y)*config.pixel.size )
 		@nextX += @step
 		return pipe
@@ -110,6 +125,9 @@ class PipeManager
 			if bird.pos.x > pipe.x
 				bird.score += pipe.score
 				pipe.score = 0
+		if bird.pos.y > config.stage.groundY - config.bird.effectiveRadius
+			console.log 'hit-ground'
+			return false
 		return true
 
 
@@ -120,7 +138,7 @@ theta = (dx,dy)->
 	if t>0
 		return t * 90
 	else 
-		return 360 + t * 90
+		return 360 + t * 45 
 onFrame = (repeat)->
 	currentTime = (new Date()).getTime()
 	t = (currentTime - startTime)/1000
@@ -136,12 +154,13 @@ onFrame = (repeat)->
 		bird.alive = false
 		# console.log 'hit'
 		bird.v.x = 0
-		# bird.pos.y0 = bird.pos.y
+		bird.pos.y0 = bird.pos.y
 		bird.pos.x0 = bird.pos.x
-		# bird.v.y += - (bird.v.y0/100)
-	# $('#bird').css 'transform',"rotate(#{angle}deg)"
-	# $('#bird').css '-ms-transform',"rotate(#{angle}deg)"
-	# $('#bird').css '-webkit-transform',"rotate(#{angle}deg)"
+
+		# bird.v.y = bird.v.y + t *config.stage.g (bird.v.y0/100)
+	$('#bird').css 'transform',"rotate(#{angle}deg)"
+	$('#bird').css '-ms-transform',"rotate(#{angle}deg)"
+	$('#bird').css '-webkit-transform',"rotate(#{angle}deg)"
 	if angle < 180 and angle > 44
 		state = 2
 	else
@@ -149,11 +168,15 @@ onFrame = (repeat)->
 
 	$('#bird').css 'background-position', "0px #{state*config.bird.height*config.pixel.size}px"
 
+	# groundState = Math.round(bird.pos.x) % config.stage.groundTileWidth
+	groundState = -bird.pos.x*config.pixel.size
+	$('#ground').css 'background-position', groundState+"px 0px"
+
 	# $('#bird').css 'top',((bird.pos.y  - config.bird.height/2)* config.pixel.size)+'px'
-	if repeat
-		if bird.pos.y> config.stage.height - config.bird.height/2
-			flap()
-			bird.pos.y0 = config.stage.height- config.bird.height/2
+	if repeat and (bird.alive or bird.pos.y < config.stage.groundY - config.bird.effectiveRadius)
+		# if bird.pos.y>= config.stage.groundY - config.bird.height/2
+		# 	flap()
+		# 	bird.pos.y0 = config.stage.height- config.bird.height/2
 		requestAnimateFrame ()->
 			onFrame true
 			return
@@ -171,7 +194,7 @@ $(document).keydown (event) ->
 	# if event.keyCode == 32
 		flap()
 
-pipeMan = new PipeManager 1.2*config.pipe.gap,1.5*(config.stage.width),config.pipe.distance+config.pipe.width,freePairs
+pipeMan = new PipeManager 1.5*(config.stage.width),config.pipe.distance+config.pipe.width,freePairs
 
 
 requestAnimateFrame ()->

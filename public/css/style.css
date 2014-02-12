@@ -47,3 +47,13 @@ a {
 	top: 40px;
 	position: absolute;
 }
+#ground {
+	background: #dedb94 url(../img/floor.jpg) 0px 0px repeat-x;
+	z-index: 7;
+	position: absolute;
+}
+#buidlings {
+	background: #dedb94 url(../img/buildings.jpg) 0px 0px repeat-x;
+	z-index: 8;
+	position: absolute;
+}
