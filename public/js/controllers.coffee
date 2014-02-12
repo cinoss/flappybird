@@ -9,7 +9,7 @@ window.requestAnimateFrame = ((callback) ->
 	)()
 config = {}
 config.pixel =
-	size : 3
+	size : 2.5
 config.pipe =
 	distance : 56
 	gap : 51
@@ -30,19 +30,9 @@ config.bird =
 	width : 21
 	effectiveRadius : 12/2
 	screenX : config.pipe.distance
-bird =
-	alive : true
-	score : 0
-	pos :
-		x : 0
-		x0 : 0
-		y0 : config.stage.height/2
-		y : config.stage.height/2
-	v :
-		x : 80
-		y : 0
-		y0 : -180
+	v : 
 		x0 : 80
+		y0 : -180
 config.stage.gapMax = 1.2 * config.pipe.gap
 config.stage.groundY = config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2 + config.pipe.gap + 2 * config.pipe.topHeight
 
@@ -50,14 +40,24 @@ config.stage.groundY = config.stage.gapMax + (config.stage.height - config.stage
 ratio = 1
 config.stage.g = 500 * ratio
 # bird.v.x = 80 * ratio
-bird.v.y0 = -180 * ratio
-
+config.bird.v.y0 = -180 * ratio
+bird = {}
+bird.alive = true
+bird.score = 0
+bird.pos =
+	x : 0
+	x0 : 0
+	y0 : config.stage.height/2
+	y : config.stage.height/2
+bird.v =
+	x : 80
+	y : 0
 
 # config.bird.height/2 = config.bird.height / 2
 $('#bird').css('height',(config.bird.height * config.pixel.size)+'px')
 $('#bird').css('width',(config.bird.width * config.pixel.size)+'px')
 # $('#bird').css('background-size','url(img/birds.png)')
-$('#bird').css('top',((bird.pos.y  - config.bird.height/2)* config.pixel.size)+'px')
+$('#bird').css('top',(config.stage.height* config.pixel.size)+'px')
 $('#bird').css('left',((config.bird.screenX - config.bird.width/2) * config.pixel.size)+'px')
 
 $('.pipe').css('width',(config.pipe.width * config.pixel.size)+'px')
@@ -85,7 +85,6 @@ $('#clouds').css('top',((config.stage.groundY-config.stage.buildingHeight-config
 $('#clouds').css('background-size','auto '+(config.stage.cloudHeight * config.pixel.size)+'px')
 
 
-freePairs = $.makeArray($('.pair'))
 # init()
 
 class PipeManager
@@ -146,7 +145,6 @@ class PipeManager
 		return true
 
 
-bigbang = startTime = (new Date()).getTime()
 theta = (dx,dy)->
 	t = dy/(Math.abs(dx)+Math.abs(dy))
 	# t = Math.atan2(dy,dx)/(2*Math.PI)
@@ -154,29 +152,88 @@ theta = (dx,dy)->
 		return t * 90
 	else 
 		return 360 + t * 30 
-onFrame = (repeat)->
+
+onIntroFrame = ()->
+	# console.log "....."
+	unless status == 'intro'
+		return
 	currentTime = (new Date()).getTime()
-	t = (currentTime - startTime)/1000
+	t = (currentTime - bigbang)/1000
+
+	groundState = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)
+	$('#ground').css 'background-position', groundState+"px 0px"
+
+	wingState = Math.round((currentTime-bigbang)/150)%3
+	$('#bird').css 'background-position', "0px #{wingState*config.bird.height*config.pixel.size}px"
+
+	bird.pos.y = bird.pos.y0 + Math.sin(t*5)*config.bird.effectiveRadius
+	$('#bird').css 'top',((bird.pos.y  - config.bird.height/2)* config.pixel.size)+'px'
+
+	requestAnimateFrame ()->
+		onIntroFrame()
+		return
+	return
+start = () ->
+	window.startTime = (new Date()).getTime()
+	console.log 'start'
+	console.log startTime
+	$('#stage').off('mousedown')
+	$(document).off('keydown')
+	$('#stage').mousedown flap
+	$(document).keydown (event) ->
+		# if event.keyCode == 32
+			flap()
+	window.status = 'playing'
+	freePairs = $.makeArray($('.pair'))
+	$('.pair').css("left",-config.pipe.width*config.pixel.size)
+	window.pipeMan = new PipeManager 1.5*(config.stage.width),config.pipe.distance+config.pipe.width,freePairs
+	flap()
+	requestAnimateFrame ()->
+		onFrame true
+		return
+
+
+reset = () ->
+	window.bigbang = (new Date()).getTime()
+	window.bird.alive = true
+	window.bird.score = 0
+	window.bird.pos =
+		x : 0
+		x0 : 0
+		y0 : config.stage.height/2
+		y : config.stage.height/2
+	window.bird.v =
+		x : 80
+		y : 0
+	$('#stage').mousedown start
+	$(document).keydown start
+	window.status = 'intro'
+	requestAnimateFrame ()->
+		onIntroFrame()
+		return
+onFrame = (repeat)->
+	# console.log window.startTime
+	currentTime = (new Date()).getTime()
+	t = (currentTime - window.startTime)/1000
 	bird.pos.y = bird.pos.y0 + bird.v.y * t + 0.5 * config.stage.g * Math.pow(t, 2)
 	if bird.pos.y > config.stage.groundY - config.bird.effectiveRadius
 		bird.pos.y = config.stage.groundY - config.bird.effectiveRadius
 	bird.pos.x = bird.pos.x0 + bird.v.x * t
 	# console.log(t + " y=" + bird.pos.y)
-	lastTime = currentTime
 	$('#bird').css 'top',((bird.pos.y  - config.bird.height/2)* config.pixel.size)+'px'
 	angle =  theta(bird.v.x, bird.v.y + t *config.stage.g)
 	# console.log(Math.round angle)
 	pipeMan.update(bird.pos.x - config.bird.screenX)
 	if bird.alive and not pipeMan.checkBird()
-		startTime = (new Date()).getTime()
+		window.startTime = (new Date()).getTime()
 		bird.alive = false
 		# console.log 'hit'
 		bird.v.x = 0
 		bird.pos.y0 = bird.pos.y
 		bird.pos.x0 = bird.pos.x
-		bird.v.y = bird.v.y0/2
+		bird.v.y = config.bird.v.y0/2
 
-		# bird.v.y = bird.v.y + t *config.stage.g (bird.v.y0/100)
+		# bird.v.y = bird.v.y + t *config.stage.g (config.bird.v.y0/100)
 	$('#bird').css 'transform',"rotate(#{angle}deg)"
 	$('#bird').css '-ms-transform',"rotate(#{angle}deg)"
 	$('#bird').css '-webkit-transform',"rotate(#{angle}deg)"
@@ -189,7 +246,7 @@ onFrame = (repeat)->
 
 	# groundState = Math.round(bird.pos.x) % config.stage.groundTileWidth
 	if bird.alive
-		groundState = -(currentTime-bigbang)/1000 * (bird.v.x0*config.pixel.size)
+		groundState = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)
 		# console.log groundState
 		# groundState = -bird.pos.x*config.pixel.size
 		$('#ground').css 'background-position', groundState+"px 0px"
@@ -206,24 +263,15 @@ onFrame = (repeat)->
 flap = ()->
 	if bird.alive and bird.pos.y > config.bird.height/2
 		onFrame false
-		startTime = (new Date()).getTime()
+		window.startTime = (new Date()).getTime()
 		bird.pos.y0 = bird.pos.y
 		bird.pos.x0 = bird.pos.x
 		# console.log(startTime + " y=" + bird.pos.y0)
-		bird.v.y = bird.v.y0
-$('#stage').mousedown flap
-$(document).keydown (event) ->
-	# if event.keyCode == 32
-		flap()
+		bird.v.y = config.bird.v.y0
 
-pipeMan = new PipeManager 1.5*(config.stage.width),config.pipe.distance+config.pipe.width,freePairs
+reset()
+# MainCtrl = ($scope,$timeout)-> 
+# 	# init = ->
 
 
-requestAnimateFrame ()->
-	onFrame true
-	return
-MainCtrl = ($scope,$timeout)-> 
-	# init = ->
-
-
-	return
+# 	return
