@@ -10,7 +10,7 @@ a {
 #stage {
 	margin-left: auto;
 	margin-right: auto;
-	background: #00c4cd;
+	background: #4ac3ce;
 	/*height: 720px;*/
 	/*width: 560px;*/
 	/*height: 360px;*/
@@ -52,8 +52,14 @@ a {
 	z-index: 7;
 	position: absolute;
 }
-#buidlings {
+
+#clouds {
+	background: #dedb94 url(../img/clouds.jpg) 0px 0px repeat-x;
+	z-index: 3;
+	position: absolute;
+}
+#buildings {
 	background: #dedb94 url(../img/buildings.jpg) 0px 0px repeat-x;
-	z-index: 8;
+	z-index: 3;
 	position: absolute;
 }

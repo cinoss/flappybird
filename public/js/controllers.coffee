@@ -20,6 +20,7 @@ config.stage =
 	g : 500
 	groundTileWidth : 12
 	buildingHeight : 33
+	cloudHeight : 13
 	height : config.pipe.gap * 4
 	width : (config.pipe.distance + config.pipe.width) * 2
 	# width : 720/config.pixel
@@ -27,7 +28,7 @@ config.bird =
 	size : 21
 	height : 16
 	width : 21
-	effectiveRadius : 16/2
+	effectiveRadius : 12/2
 	screenX : config.pipe.distance
 bird =
 	alive : true
@@ -40,9 +41,18 @@ bird =
 	v :
 		x : 80
 		y : 0
-		y0 : -160
+		y0 : -180
+		x0 : 80
 config.stage.gapMax = 1.2 * config.pipe.gap
 config.stage.groundY = config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2 + config.pipe.gap + 2 * config.pipe.topHeight
+
+#config for speed
+ratio = 1.05
+config.stage.g = 500 * ratio
+# bird.v.x = 80 * ratio
+bird.v.y0 = -180 * ratio
+
+
 # config.bird.height/2 = config.bird.height / 2
 $('#bird').css('height',(config.bird.height * config.pixel.size)+'px')
 $('#bird').css('width',(config.bird.width * config.pixel.size)+'px')
@@ -68,6 +78,11 @@ $('#buildings').css('height',((config.stage.buildingHeight) * config.pixel.size)
 $('#buildings').css('width',(config.stage.width * config.pixel.size)+'px')
 $('#buildings').css('top',((config.stage.groundY-config.stage.buildingHeight) * config.pixel.size)+'px')
 $('#buildings').css('background-size','auto '+(config.stage.buildingHeight * config.pixel.size)+'px')
+
+$('#clouds').css('height',((config.stage.cloudHeight) * config.pixel.size)+'px')
+$('#clouds').css('width',(config.stage.width * config.pixel.size)+'px')
+$('#clouds').css('top',((config.stage.groundY-config.stage.buildingHeight-config.stage.cloudHeight) * config.pixel.size)+'px')
+$('#clouds').css('background-size','auto '+(config.stage.cloudHeight * config.pixel.size)+'px')
 
 
 freePairs = $.makeArray($('.pair'))
@@ -138,11 +153,13 @@ theta = (dx,dy)->
 	if t>0
 		return t * 90
 	else 
-		return 360 + t * 45 
+		return 360 + t * 30 
 onFrame = (repeat)->
 	currentTime = (new Date()).getTime()
 	t = (currentTime - startTime)/1000
 	bird.pos.y = bird.pos.y0 + bird.v.y * t + 0.5 * config.stage.g * Math.pow(t, 2)
+	if bird.pos.y > config.stage.groundY - config.bird.effectiveRadius/2
+		bird.pos.y = config.stage.groundY - config.bird.effectiveRadius/2
 	bird.pos.x = bird.pos.x0 + bird.v.x * t
 	# console.log(t + " y=" + bird.pos.y)
 	lastTime = currentTime
@@ -151,11 +168,13 @@ onFrame = (repeat)->
 	# console.log(Math.round angle)
 	pipeMan.update(bird.pos.x - config.bird.screenX)
 	if bird.alive and not pipeMan.checkBird()
+		startTime = (new Date()).getTime()
 		bird.alive = false
 		# console.log 'hit'
 		bird.v.x = 0
 		bird.pos.y0 = bird.pos.y
 		bird.pos.x0 = bird.pos.x
+		bird.v.y = bird.v.y0/2
 
 		# bird.v.y = bird.v.y + t *config.stage.g (bird.v.y0/100)
 	$('#bird').css 'transform',"rotate(#{angle}deg)"
