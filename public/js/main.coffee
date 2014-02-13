@@ -22,16 +22,17 @@ pipeMan = null
 scaleMatrix = null 
 scaleRatio = 1
 
-loadQueue = new createjs.LoadQueue();
+loadQueue = new createjs.LoadQueue;
 
+handler = {}
 status = ''
 
 init = () ->
 	config = {}
 	config.pixel =
-		size : 3
+		size : 2.9
 		originalSize : 5
-	scaleMatrix = new createjs.Matrix2D()
+	# scaleMatrix = new createjs.Matrix2D
 
 
 	scaleRatio = config.pixel.size/config.pixel.originalSize
@@ -42,7 +43,7 @@ init = () ->
 	cloud.scaleY = cloud.scaleX = scaleRatio
 
 
-	scaleMatrix.scale scaleRatio, scaleRatio
+	# scaleMatrix.scale scaleRatio, scaleRatio
 	config.pipe =
 		distance : 56
 		gap : 51
@@ -77,7 +78,7 @@ init = () ->
 	ratio = 1
 	config.stage.g = 650 * ratio
 	config.bird.v.x0 = 60 * ratio
-	config.bird.v.x0 = config.pipe.distance *1.5* ratio
+	config.bird.v.x0 = config.pipe.distance * 1.2* ratio
 	config.bird.v.y0 = -195
 	bird = {}
 	bird.alive = true
@@ -93,7 +94,7 @@ init = () ->
 
 main = () ->
 	# canvas = document.getElementById('flyStage')
-	stage = new createjs.Stage('flyStage')
+	stage = new createjs.Stage('stage')
 	stage.mouseEventsEnabled = true
 	
 	init()
@@ -106,17 +107,17 @@ main = () ->
 	
 
 	manifest = [
-				{ src:'/img/floor.jpg', id:'groundTile'},
-				{ src:'/img/buildings.jpg', id:'buildingTile'},
-				{ src:'/img/clouds.jpg', id:'cloudTile'},
-				{ src:'/img/pipe.gif', id:'pipeTile'},
-				{ src:'/img/birds.gif', id:'birdSeq'},
+		{ src:'/img/floor.jpg', id:'groundTile'},
+		{ src:'/img/buildings.jpg', id:'buildingTile'},
+		{ src:'/img/clouds.jpg', id:'cloudTile'},
+		{ src:'/img/pipe.gif', id:'pipeTile'},
+		{ src:'/img/birds.gif', id:'birdSeq'},
 
-				{ src: '/audio/flap.mp3', id :'flapSound'},
-				{ src: '/audio/hit.mp3', id :'hitSound'},
-				{ src: '/audio/fall.mp3', id :'fallSound'},
-				{ src: '/audio/score.mp3', id :'scoreSound'},
-			]
+		{ src: '/audio/flap.mp3', id :'flapSound'},
+		{ src: '/audio/hit.mp3', id :'hitSound'},
+		{ src: '/audio/fall.mp3', id :'fallSound'},
+		{ src: '/audio/score.mp3', id :'scoreSound'},
+	]
 
 	loadQueue.installPlugin(createjs.Sound)
 	# loadQueue.onProgress = handleProgress
@@ -128,6 +129,30 @@ main = () ->
 	
 	createjs.Ticker.addEventListener("tick", stage);
 	createjs.Ticker.setFPS(FPS)
+
+	if ('ontouchstart' in document.documentElement) 
+		canvas.addEventListener 'touchstart', (e) ->
+			handleKeyDown()
+		, false
+
+		canvas.addEventListener 'touchend', (e) ->
+			handleKeyUp();
+		, false
+	else 
+		document.onkeydown = handleKeyDown;
+		document.onkeyup = handleKeyUp;
+
+		if (window.navigator.msPointerEnabled) 
+			document.getElementById('body').addEventListener "MSPointerDown", handleKeyDown, false
+			document.getElementById('body').addEventListener "MSPointerUp", handleKeyUp, false
+		else 
+			document.onmousedown = handleKeyDown
+			document.onmouseup = handleKeyUp
+handleKeyDown = () ->
+	handler.touch()
+	return
+handleKeyUp = () ->
+	return
 handleProgress = (event) ->
 	return
 handleComplete = (event) ->
@@ -149,6 +174,8 @@ handleFileLoad = (event) ->
 			createjs.Sound.registerSound(event.result, event.result.id);
 		# 	handleLoadComplete()
 addMainView = ()->
+	createjs.Ticker.addEventListener("tick", handleTick);
+	intro()
 	console.log '---- main -----'
 	renderBasic()
 	ground.y = config.stage.groundY * config.pixel.size
@@ -162,12 +189,11 @@ addMainView = ()->
 		stage.addChild pair
 		pair.x = -1000
 		# break
+	birdView.y = -100;
 	birdView.x = (config.bird.screenX) * config.pixel.size
 	stage.addChild birdView
 	stage.addChild ground
 	stage.update();
-	createjs.Ticker.addEventListener("tick", handleTick);
-	intro()
 	return
 class PipeManager
 	constructor: (@nextX, @step, @freePairs) ->
@@ -240,7 +266,7 @@ handleTick = () ->
 			t = (currentTime - bigbang)/1000
 
 			groundPosition = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)
-			ground.x = Math.floor(groundPosition) % (config.stage.groundTileWidth * config.pixel.size) + groundPosition - Math.floor(groundPosition)
+			ground.x = groundPosition % (config.stage.groundTileWidth * config.pixel.size)
 
 			# buildingState = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)/4
 			# $('#buildings').css 'background-position', buildingState+"px 0px"
@@ -274,7 +300,7 @@ handleTick = () ->
 
 			if bird.alive
 				groundPosition = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)
-				ground.x = Math.floor(groundPosition) % (config.stage.groundTileWidth * config.pixel.size) + groundPosition - Math.floor(groundPosition)
+				ground.x = groundPosition % (config.stage.groundTileWidth * config.pixel.size)
 				pipeMan.update(bird.pos.x - config.bird.screenX)
 
 				oldScore = bird.score
@@ -306,18 +332,12 @@ renderBasic = () ->
 	return
 intro = () ->
 	status = 'intro'
-	stage.on 'mousedown', ()->
-		flap()
-		play()
-	stage.on 'touchstart', ()->
+	handler.touch = ()->
 		flap()
 		play()
 play = () ->
 	console.log 'play'
-	stage.removeAllEventListeners 'mousedown'
-	stage.on 'mousedown', flap
-	stage.removeAllEventListeners 'touchstart'
-	stage.on 'touchstart', flap
+	handler.touch = flap
 	startTime = (new Date()).getTime()
 	pipeMan = new PipeManager 1.5*(config.stage.width), config.pipe.distance+config.pipe.width, pairs.slice()
 	status = 'play'
@@ -379,7 +399,7 @@ renderShape = (assetId, img) ->
 				pipeDown.graphics.drawRect 0, 0, img.width, img.height
 				pipeDown.graphics.endFill()
 				pair.addChild pipeUp, pipeDown
-				# pairs.scaleY = pairs.scaleX = scaleRatio
+
 				pair.cache 0, -img.height * scaleRatio, img.width * scaleRatio, 2*img.height * scaleRatio +  config.pipe.gap * config.pixel.size
 				pairs.push pair
 		when 'birdSeq'
