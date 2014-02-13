@@ -93,8 +93,8 @@ init = () ->
 		y : 0
 
 main = () ->
-	# canvas = document.getElementById('flyStage')
-	stage = new createjs.Stage('stage')
+	canvas = document.getElementById('stage')
+	stage = new createjs.Stage(canvas)
 	stage.mouseEventsEnabled = true
 	
 	init()

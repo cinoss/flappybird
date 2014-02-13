@@ -101,8 +101,9 @@ init = function() {
 };
 
 main = function() {
-  var manifest;
-  stage = new createjs.Stage('stage');
+  var canvas, manifest;
+  canvas = document.getElementById('stage');
+  stage = new createjs.Stage(canvas);
   stage.mouseEventsEnabled = true;
   init();
   manifest = [
