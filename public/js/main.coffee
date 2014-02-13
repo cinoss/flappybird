@@ -3,7 +3,7 @@ FPS = 60
 muted = false
 
 startTime = 0
-bigbang = (new Date()).getTime()
+lastTime = bigbang = (new Date()).getTime()
 
 # mainView = new Container
 config = null
@@ -30,20 +30,8 @@ status = ''
 init = () ->
 	config = {}
 	config.pixel =
-		size : 2.9
+		size : 3
 		originalSize : 5
-	# scaleMatrix = new createjs.Matrix2D
-
-
-	scaleRatio = config.pixel.size/config.pixel.originalSize
-
-	# set scale
-	ground.scaleY = ground.scaleX = scaleRatio
-	building.scaleY = building.scaleX = scaleRatio
-	cloud.scaleY = cloud.scaleX = scaleRatio
-
-
-	# scaleMatrix.scale scaleRatio, scaleRatio
 	config.pipe =
 		distance : 56
 		gap : 51
@@ -55,19 +43,24 @@ init = () ->
 		groundTileWidth : 12
 		buildingHeight : 33
 		cloudHeight : 13
-		# height : config.pipe.gap * 4.5
+		height : config.pipe.gap * 4.5
 		# width : (config.pipe.distance + config.pipe.width) * 2
-		height : stage.canvas.height/config.pixel.size
+		# height : stage.canvas.height/config.pixel.size
 		width : stage.canvas.width/config.pixel.size
 
-	config.pipe.num = Math.round(config.stage.width /(config.pipe.distance + config.pipe.width) ) 
-
+	config.pixel.size = (stage.canvas.height/(config.pipe.gap * 4.5))
+	config.stage.width = stage.canvas.width/config.pixel.size
+	console.log [stage.canvas.height,(config.pipe.gap * 4.5)]
+	console.log ['pixel',config.pixel.size]
+	config.pipe.num = Math.round(config.stage.width / (config.pipe.distance + config.pipe.width) ) 
+	# config.pipe.num = 1
 	config.bird =
 		size : 21
 		height : 16
 		width : 21
 		effectiveRadius : 12/2
-		screenX : config.pipe.distance
+		# screenX : config.pipe.distance
+		screenX : (config.stage.width/3)
 		v : 
 			x0 : 80
 			y0 : -180
@@ -91,9 +84,24 @@ init = () ->
 	bird.v =
 		x : config.bird.v.x0
 		y : 0
+	scaleRatio = config.pixel.size/config.pixel.originalSize
+	ground.scaleY = ground.scaleX = scaleRatio
+	building.scaleY = building.scaleX = scaleRatio
+	cloud.scaleY = cloud.scaleX = scaleRatio
+
 
 main = () ->
 	canvas = document.getElementById('stage')
+	canvas = document.createElement("canvas");
+	canvas.height = Math.min($(window).height(),5500) || 480;
+	canvas.width = Math.min($(window).width(),9000) || 640;
+	canvas.height -= 100
+	if canvas.width > canvas.height * 2
+		canvas.width = Math.round(canvas.height * 2)
+	$('#stage').append(canvas);
+
+	console.log ['window',$(window).height(),$(window).width()]
+
 	stage = new createjs.Stage(canvas)
 	stage.mouseEventsEnabled = true
 	
@@ -131,6 +139,8 @@ main = () ->
 	createjs.Ticker.setFPS(FPS)
 
 	if ('ontouchstart' in document.documentElement) 
+		console.log 1
+		# console.log document.documentElement.ontouchstart
 		canvas.addEventListener 'touchstart', (e) ->
 			handleKeyDown()
 		, false
@@ -139,16 +149,20 @@ main = () ->
 			handleKeyUp();
 		, false
 	else 
+		console.log 2
 		document.onkeydown = handleKeyDown;
 		document.onkeyup = handleKeyUp;
 
 		if (window.navigator.msPointerEnabled) 
+			# console.log 3
 			document.getElementById('body').addEventListener "MSPointerDown", handleKeyDown, false
 			document.getElementById('body').addEventListener "MSPointerUp", handleKeyUp, false
 		else 
+			# console.log 4
 			document.onmousedown = handleKeyDown
 			document.onmouseup = handleKeyUp
 handleKeyDown = () ->
+	console.log 'touch'
 	handler.touch()
 	return
 handleKeyUp = () ->
@@ -207,6 +221,10 @@ class PipeManager
 			pair : @freePairs.pop()
 		# $("##{pipe.pair.id}").css('top',(pipe.y+(config.stage.height-config.stage.gapMax-config.pipe.gap)/2)*config.pixel.size )
 		pipe.pair.y = (pipe.y)*config.pixel.size
+		pipe.x1 = pipe.x + config.pipe.width + config.bird.effectiveRadius
+		pipe.x0 = pipe.x - config.bird.effectiveRadius
+		pipe.y0 = pipe.y + config.bird.effectiveRadius
+		pipe.y1 = pipe.y + config.pipe.gap - config.bird.effectiveRadius	
 		@nextX += @step
 		return pipe
 	update : (viewportX) ->
@@ -223,25 +241,24 @@ class PipeManager
 	checkBird : () ->
 		# console.log "+++++++++++"
 		for pipe in @pipes
+			if bird.pos.x < pipe.x0 or bird.pos.x> pipe.x1
+				continue
 			# top pipe
 			if bird.pos.y <= pipe.y
-				if bird.pos.x <= pipe.x + config.pipe.width + config.bird.effectiveRadius and bird.pos.x >= pipe.x - config.bird.effectiveRadius
+				if bird.pos.x <= pipe.x1 and bird.pos.x >= pipe.x0
 					console.log 'hit 1'
 					return false
 			# bottom pipe
-			# console.log [bird.pos.y , pipe.y + config.pipe.gap]
 			if bird.pos.y >= pipe.y + config.pipe.gap
-				if bird.pos.x <= pipe.x + config.pipe.width + config.bird.effectiveRadius and bird.pos.x >= pipe.x - config.bird.effectiveRadius
+				if bird.pos.x <= pipe.x1 and bird.pos.x >= pipe.x0
 					console.log 'hit 2'
 					return false
 			#middle
 			if bird.pos.x <= pipe.x + config.pipe.width and bird.pos.x >= pipe.x
-				# console.log [bird.pos.x , pipe.x + config.pipe.width , pipe.x]
-				# console.log [bird.pos.y , pipe.y + config.bird.effectiveRadius,pipe.y + config.pipe.gap - config.bird.effectiveRadius]
-				if bird.pos.y < pipe.y + config.bird.effectiveRadius
+				if bird.pos.y < pipe.y0
 					console.log 'hit 3'
 					return false 
-				if bird.pos.y > pipe.y + config.pipe.gap - config.bird.effectiveRadius					
+				if bird.pos.y > pipe.y1
 					console.log 'hit 4'
 					return false 
 			if bird.pos.x > pipe.x
@@ -339,7 +356,7 @@ play = () ->
 	console.log 'play'
 	handler.touch = flap
 	startTime = (new Date()).getTime()
-	pipeMan = new PipeManager 1.5*(config.stage.width), config.pipe.distance+config.pipe.width, pairs.slice()
+	pipeMan = new PipeManager 1*(config.stage.width), config.pipe.distance+config.pipe.width, pairs.slice()
 	status = 'play'
 
 flap = ()->

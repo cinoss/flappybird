@@ -1,12 +1,49 @@
 body {
-  font-family: "04B_19__", "Lucida Console", Monaco, monospace;
-  min-height: 1000px;
-  /*background: url(../img/background.png);*/
+	font-family: "04B_19__", "Lucida Console", Monaco, monospace;
+	/*min-height: 1000px;*/
+	padding: 0px;
+	border: 0px;
+	margin: 0px;
+	/*overflow: hidden;*/
+	/*background: url(../img/background.png);*/
 }
+/*
+* {
+	-ms-touch-action: none;
+}*/
+
+/*body, html {height:100%;}*/
+
 @font-face {
 	font-family: "04B_19__";
 	src: url(../font/04B_19__.woff);
 	/*src: url(../font/04B_19__.ttf);*/
+}
+/*div.wrap {height:100%; overflow:hidden;}*/
+canvas {
+    image-rendering: optimizeSpeed;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+    -ms-interpolation-mode: nearest-neighbor;
+	margin-left: auto !important;
+	margin-right: auto !important;
+}
+#stage {
+	margin-left: auto !important;
+	margin-right: auto !important;
+	background: #4ac3ce;
+	height: 100%;
+	width: 100%;
+	/*width: 560px;*/
+	/*height: 360px;*/
+	/*width: 280px;*/
+	position: relative;
+	z-index: 1;
+	width: auto;
+	overflow: hidden;
+	/*margin: 15px 0px;*/
+	/*border: 3px solid;*/
 }
 
 /*a {
@@ -93,23 +130,6 @@ body {
 	z-index: 12 !important;
 
 	color: #5adb5a;
-	text-shadow:
-
-
-}
-#stage {
-	margin-left: auto !important;
-	margin-right: auto !important;
-	background: #4ac3ce;
-	/*height: 720px;*/
-	/*width: 560px;*/
-	/*height: 360px;*/
-	/*width: 280px;*/
-	position: relative;
-	z-index: 1;
-	overflow: hidden;
-	margin: 15px 0px;
-	border: 3px solid;
 }
 
 #bird {
