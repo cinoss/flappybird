@@ -43,13 +43,14 @@ init = () ->
 		groundTileWidth : 12
 		buildingHeight : 33
 		cloudHeight : 13
-		height : config.pipe.gap * 4.5
+		# height : config.pipe.gap * 4.5
 		# width : (config.pipe.distance + config.pipe.width) * 2
-		# height : stage.canvas.height/config.pixel.size
+		height : stage.canvas.height/config.pixel.size
 		width : stage.canvas.width/config.pixel.size
 
-	config.pixel.size = (stage.canvas.height/(config.pipe.gap * 4.5))
-	config.stage.width = stage.canvas.width/config.pixel.size
+	# config.pixel.size = (stage.canvas.height/(config.pipe.gap * 4.5))
+	# config.pixel.size = Math.round(config.pixel.size * 2)/2
+	# config.stage.width = stage.canvas.width/config.pixel.size
 	console.log [stage.canvas.height,(config.pipe.gap * 4.5)]
 	console.log ['pixel',config.pixel.size]
 	config.pipe.num = Math.round(config.stage.width / (config.pipe.distance + config.pipe.width) ) 
@@ -95,10 +96,11 @@ main = () ->
 	canvas = document.createElement("canvas");
 	canvas.height = Math.min($(window).height(),5500) || 480;
 	canvas.width = Math.min($(window).width(),9000) || 640;
-	canvas.height -= 100
+	canvas.height *= 3/4
 	if canvas.width > canvas.height * 2
 		canvas.width = Math.round(canvas.height * 2)
 	$('#stage').append(canvas);
+	$('#stage').height(canvas.height)
 
 	console.log ['window',$(window).height(),$(window).width()]
 
@@ -192,6 +194,7 @@ addMainView = ()->
 	intro()
 	console.log '---- main -----'
 	renderBasic()
+	renderDOM()
 	ground.y = config.stage.groundY * config.pixel.size
 	building.y = (config.stage.groundY-config.stage.buildingHeight) * config.pixel.size
 	cloud.y = (config.stage.groundY-config.stage.buildingHeight-config.stage.cloudHeight) * config.pixel.size
@@ -333,7 +336,7 @@ handleTick = () ->
 					bird.pos.x0 = bird.pos.x
 					bird.v.y = config.bird.v.y0/2
 				if oldScore < bird.score
-					# $('#score').text(bird.score);
+					$('#score').text(bird.score);
 					createjs.Sound.play('scoreSound') unless muted		
 
 
@@ -347,6 +350,15 @@ renderBasic = () ->
 	background.graphics.drawRect 0, 0, stage.canvas.width, stage.canvas.height
 	background.graphics.endFill()
 	return
+renderDOM = () ->
+	$('#score').css('width',(config.stage.width * config.pixel.size)+'px')
+	$('#score').css('top',((config.stage.height-config.stage.groundY) * config.pixel.size)+'px')
+	$('#score').css('font-size',config.bird.size * config.pixel.size);
+	$('#score').text(bird.score)
+	z = config.pixel.size
+	$('#score').css('text-shadow',"
+		#{z}px #{z}px 0 #000
+	")
 intro = () ->
 	status = 'intro'
 	handler.touch = ()->
