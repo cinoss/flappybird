@@ -339,7 +339,11 @@ renderBasic = function() {
 
 intro = function() {
   status = 'intro';
-  return stage.on('mousedown', function() {
+  stage.on('mousedown', function() {
+    flap();
+    return play();
+  });
+  return stage.on('touchstart', function() {
     flap();
     return play();
   });
@@ -349,6 +353,8 @@ play = function() {
   console.log('play');
   stage.removeAllEventListeners('mousedown');
   stage.on('mousedown', flap);
+  stage.removeAllEventListeners('touchstart');
+  stage.on('touchstart', flap);
   startTime = (new Date()).getTime();
   pipeMan = new PipeManager(1.5 * config.stage.width, config.pipe.distance + config.pipe.width, pairs.slice());
   return status = 'play';

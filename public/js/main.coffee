@@ -309,10 +309,15 @@ intro = () ->
 	stage.on 'mousedown', ()->
 		flap()
 		play()
+	stage.on 'touchstart', ()->
+		flap()
+		play()
 play = () ->
 	console.log 'play'
 	stage.removeAllEventListeners 'mousedown'
 	stage.on 'mousedown', flap
+	stage.removeAllEventListeners 'touchstart'
+	stage.on 'touchstart', flap
 	startTime = (new Date()).getTime()
 	pipeMan = new PipeManager 1.5*(config.stage.width), config.pipe.distance+config.pipe.width, pairs.slice()
 	status = 'play'
