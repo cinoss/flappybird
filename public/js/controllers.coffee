@@ -69,7 +69,10 @@ updateSize = () ->
 	# console.log config.pipe.imgHeight*config.pixel.size
 	$('.pipe.down').css('background-position',"0px #{(config.stage.height-config.pipe.imgHeight)*config.pixel.size}px" )
 	$('.pipe.down').css('top',-1*(config.stage.height * config.pixel.size)+'px')
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1933970318ff319d7f607fec421acb5d4879c03e
 	$('#stage').css('border',config.pixel.size+'px black solid')
 	$('#stage').css('height',(config.stage.height * config.pixel.size)+'px')
 	$('#stage').css('width',(config.stage.width * config.pixel.size)+'px')
@@ -256,9 +259,15 @@ onFrame = (repeat)->
 	oldScore = bird.score
 	if bird.alive and not pipeMan.checkBird()
 		if bird.pos.y < config.stage.groundY - config.bird.effectiveRadius
+<<<<<<< HEAD
 			fallSound.play() unless muted
 			hitSound.play() unless muted
 		startTime = (new Date()).getTime()
+=======
+			fallSound.play()
+			hitSound.play()
+		window.startTime = (new Date()).getTime()
+>>>>>>> 1933970318ff319d7f607fec421acb5d4879c03e
 		bird.alive = false
 		# console.log 'hit'
 		bird.v.x = 0
@@ -268,8 +277,12 @@ onFrame = (repeat)->
 		# bird.v.y = bird.v.y + t *config.stage.g (config.bird.v.y0/100)
 	if oldScore < bird.score
 		$('#score').text(bird.score);
+<<<<<<< HEAD
 		scoreSound.play() unless muted		
 
+=======
+		scoreSound.play()		
+>>>>>>> 1933970318ff319d7f607fec421acb5d4879c03e
 	angle =  theta(bird.v.x, bird.v.y + t *config.stage.g)
 	$('#bird').css 'transform',"rotate(#{angle}deg)"
 	$('#bird').css '-ms-transform',"rotate(#{angle}deg)"
@@ -311,7 +324,11 @@ flap = ()->
 		# console.log(startTime + " y=" + bird.pos.y0)
 		bird.v.y = config.bird.v.y0
 gameOver = () ->
+<<<<<<< HEAD
 	hitSound.play() unless muted
+=======
+	hitSound.play()
+>>>>>>> 1933970318ff319d7f607fec421acb5d4879c03e
 	$('#get-ready').css('display','none');
 	$('#game-over').css('display','inherit');
 	$('#score').css('display','none');
