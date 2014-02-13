@@ -59,9 +59,12 @@ init = function() {
     groundTileWidth: 12,
     buildingHeight: 33,
     cloudHeight: 13,
-    height: stage.canvas.height / config.pixel.size,
-    width: stage.canvas.width / config.pixel.size
+    height: config.pipe.gap * 4.5
   };
+  config.pixel.size = stage.canvas.height / (config.pipe.gap * 4.5);
+  config.pixel.size = Math.floor(config.pixel.size * 2) / 2;
+  config.stage.height = stage.canvas.height / config.pixel.size;
+  config.stage.width = stage.canvas.width / config.pixel.size;
   console.log([stage.canvas.height, config.pipe.gap * 4.5]);
   console.log(['pixel', config.pixel.size]);
   config.pipe.num = Math.round(config.stage.width / (config.pipe.distance + config.pipe.width));
@@ -76,7 +79,7 @@ init = function() {
       y0: -180
     }
   };
-  config.stage.gapMax = 1.7 * config.pipe.gap;
+  config.stage.gapMax = 2 * config.pipe.gap;
   config.stage.groundY = config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap) / 2 + config.pipe.gap + 2 * config.pipe.topHeight;
   ratio = 1;
   config.stage.g = 650 * ratio;
@@ -109,6 +112,7 @@ main = function() {
   canvas.height = Math.min($(window).height(), 5500) || 480;
   canvas.width = Math.min($(window).width(), 9000) || 640;
   canvas.height *= 3 / 4;
+  canvas.height = Math.max(canvas.height, 720);
   if (canvas.width > canvas.height * 2) {
     canvas.width = Math.round(canvas.height * 2);
   }
@@ -233,7 +237,7 @@ PipeManager = (function() {
   PipeManager.prototype.genPipe = function() {
     var pipe;
     pipe = {
-      y: Math.random() * config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap) / 2,
+      y: (Math.random()) * config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap) / 2,
       x: this.nextX,
       score: 1,
       pair: this.freePairs.pop()
