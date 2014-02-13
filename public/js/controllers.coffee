@@ -1,5 +1,5 @@
 'use strict'
-
+startTime = 0
 # appModule.controller 'MainCtrl', ($scope,$http,$timeout) ->
 # 	return
 
@@ -69,9 +69,12 @@ updateSize = () ->
 	# console.log config.pipe.imgHeight*config.pixel.size
 	$('.pipe.down').css('background-position',"0px #{(config.stage.height-config.pipe.imgHeight)*config.pixel.size}px" )
 	$('.pipe.down').css('top',-1*(config.stage.height * config.pixel.size)+'px')
+
 	$('#stage').css('border',config.pixel.size+'px black solid')
 	$('#stage').css('height',(config.stage.height * config.pixel.size)+'px')
 	$('#stage').css('width',(config.stage.width * config.pixel.size)+'px')
+	$('#stage').contextmenu () -> return false
+
 	$('#ground').css('height',(2*(config.stage.height-config.stage.groundY) * config.pixel.size)+'px')
 	$('#ground').css('width',(config.stage.width * config.pixel.size)+'px')
 	$('#ground').css('top',(config.stage.groundY * config.pixel.size)+'px')
@@ -173,7 +176,7 @@ theta = (dx,dy)->
 		return 360 + t * 15
 
 onIntroFrame = ()->
-	console.log window.status
+	# console.log window.status
 	unless status == 'intro'
 		return
 	currentTime = (new Date()).getTime()
@@ -197,15 +200,16 @@ onIntroFrame = ()->
 		return
 	return
 start = () ->
-	window.startTime = (new Date()).getTime()
-	console.log 'start'
-	console.log startTime
+	startTime = (new Date()).getTime()
+	# console.log 'start'
+	# console.log startTime
 	$('#stage').off('mousedown')
 	$(document).off('keydown')
 	$('#stage').mousedown flap
 	$(document).keydown (event) ->
-		event.preventDefault()
-		# if event.keyCode == 32
+		console.log event.keyCode
+		if event.keyCode == 32
+			event.preventDefault()
 		flap()
 	window.status = 'playing'
 	freePairs = $.makeArray($('.pair'))
@@ -235,15 +239,13 @@ reset = () ->
 	$('#stage').mousedown start
 	$(document).keydown start
 	window.status = 'intro'
-	console.log window.status
-	console.log '111'
 	requestAnimateFrame ()->
 		onIntroFrame()
 		return
 onFrame = (repeat)->
-	# console.log window.startTime
+	# console.log startTime
 	currentTime = (new Date()).getTime()
-	t = (currentTime - window.startTime)/1000
+	t = (currentTime - startTime)/1000
 	bird.pos.y = bird.pos.y0 + bird.v.y * t + 0.5 * config.stage.g * Math.pow(t, 2)
 	if bird.pos.y > config.stage.groundY - config.bird.effectiveRadius
 		bird.pos.y = config.stage.groundY - config.bird.effectiveRadius
@@ -256,7 +258,7 @@ onFrame = (repeat)->
 		if bird.pos.y < config.stage.groundY - config.bird.effectiveRadius
 			fallSound.play() unless muted
 			hitSound.play() unless muted
-		window.startTime = (new Date()).getTime()
+		startTime = (new Date()).getTime()
 		bird.alive = false
 		# console.log 'hit'
 		bird.v.x = 0
@@ -303,7 +305,7 @@ flap = ()->
 	if bird.alive and bird.pos.y > config.bird.height/2
 		flapSound.play() unless muted
 		onFrame false
-		window.startTime = (new Date()).getTime()
+		startTime = (new Date()).getTime()
 		bird.pos.y0 = bird.pos.y
 		bird.pos.x0 = bird.pos.x
 		# console.log(startTime + " y=" + bird.pos.y0)
