@@ -166,24 +166,26 @@ main = () ->
 
 	setupTicker()
 
-	if ('ontouchstart' in document.documentElement) 
-		canvas.addEventListener 'touchstart', (e) ->
-			handleKeyDown()
-		, false
+	# if ('ontouchstart' in document.documentElement) 
+	# 	canvas.addEventListener 'touchstart', (e) ->
+	# 		handleKeyDown()
+	# 	, false
 
-		canvas.addEventListener 'touchend', (e) ->
-			handleKeyUp();
-		, false
-	else 
-		document.onkeydown = handleKeyDown;
-		document.onkeyup = handleKeyUp;
+	# 	canvas.addEventListener 'touchend', (e) ->
+	# 		handleKeyUp();
+	# 	, false
+	# else 
+	# 	document.onkeydown = handleKeyDown;
+	# 	document.onkeyup = handleKeyUp;
 
-		if (window.navigator.msPointerEnabled) 
-			document.getElementById('body').addEventListener "MSPointerDown", handleKeyDown, false
-			document.getElementById('body').addEventListener "MSPointerUp", handleKeyUp, false
-		else 
-			document.onmousedown = handleKeyDown
-			document.onmouseup = handleKeyUp
+	# 	if (window.navigator.msPointerEnabled) 
+	# 		document.getElementById('body').addEventListener "MSPointerDown", handleKeyDown, false
+	# 		document.getElementById('body').addEventListener "MSPointerUp", handleKeyUp, false
+	# 	else 
+	# 		document.onmousedown = handleKeyDown
+	# 		document.onmouseup = handleKeyUp
+	stage.on 'stagemousedown', handleKeyDown
+	$(document).on 'keydown', handleKeyDown
 	renderDOM()
 setupTicker = () ->
 	# /* Ticker */
@@ -193,7 +195,8 @@ setupTicker = () ->
 	# createjs.Ticker.setFPS(FPS)
 	# createjs.Ticker.maxDelta = 20
 
-handleKeyDown = () ->
+handleKeyDown = (e) ->
+	e.preventDefault()
 	if handler.touch
 		handler.touch()
 	return
