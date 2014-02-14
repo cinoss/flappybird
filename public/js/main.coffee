@@ -48,7 +48,9 @@ init = () ->
 		# width : (config.pipe.distance + config.pipe.width) * 2
 		# height : stage.canvas.height/config.pixel.size
 		# width : stage.canvas.width/config.pixel.size
-
+	config.startButton =
+		height : 29
+		width : 52
 	config.pixel.size = (stage.canvas.height/(config.pipe.gap * 4))
 	config.pixel.size = Math.floor(config.pixel.size * 2)/2
 	config.stage.height = stage.canvas.height/config.pixel.size
@@ -67,7 +69,7 @@ init = () ->
 		v : 
 			x0 : 80
 			y0 : -180
-	config.stage.gapMax = 1.7 * config.pipe.gap
+	config.stage.gapMax = 1.8 * config.pipe.gap
 	config.stage.groundY = config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2 + config.pipe.gap + 2 * config.pipe.topHeight
 
 	#config for speed
@@ -205,7 +207,6 @@ handleFileLoad = (event) ->
 		# 	handleLoadComplete()
 addMainView = ()->
 	createjs.Ticker.addEventListener("tick", handleTick);
-	intro()
 	console.log '---- main -----'
 	renderBasic()
 	ground.y = config.stage.groundY * config.pixel.size
@@ -225,16 +226,26 @@ addMainView = ()->
 	stage.addChild birdView
 	stage.addChild ground
 	pipeMan = new PipeManager .5*(config.stage.width), config.pipe.distance+config.pipe.width, pairs.slice()
+	intro()
 	stage.update();
 	return
 class PipeManager
 	constructor: (@nextX, @step, @freePairs) ->
 		@pipes = []
+		@nextXsave = nextX
 	reset : () ->
+		console.log ['pipes length',@pipes.length]
+		console.log @pipes
+		while @pipes.length
+			console.log @freePairs.push @pipes.pop().pair
+		@nextX = @nextXsave
+		console.log @freePairs
+		console.log @freePairs[0]
 		return
 	genPipe : () ->
+		r = Math.round((Math.random() * 5))/5
 		pipe =
-			y : (Math.random())*config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2
+			y : r*config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2
 			x : @nextX
 			score : 1
 			pair : @freePairs.pop()
@@ -257,6 +268,7 @@ class PipeManager
 				pipe.pair.x = (pipe.screenX - @pipes[0].screenX)*config.pixel.size
 		pairContainer.x =  @pipes[0].screenX * config.pixel.size
 		if reCache
+			console.log 'recache'
 			pairContainer.cache 0, 0, @pipes.length * @step * config.pixel.size, config.stage.groundY * config.pixel.size
 
 		while @pipes.length > 0 and @pipes[0].screenX < -config.pipe.width
@@ -389,6 +401,14 @@ renderBasic = () ->
 	background.graphics.endFill()
 	return
 renderDOM = () ->
+	$('#start').css 'width',(config.startButton.width * config.pixel.size)+'px'
+	$('#start').css 'height',(config.startButton.height * config.pixel.size)+'px'
+	$('#start').css 'background-size',(config.startButton.width * config.pixel.size)+'px '+(config.startButton.height * config.pixel.size)+'px'
+
+	$('#start').css 'top',((config.stage.height - config.startButton.height)/2 * config.pixel.size)+'px'
+	$('#start').css 'left',((config.stage.width - config.startButton.width)/2 * config.pixel.size)+'px'
+	$('#start').click(intro)
+
 	$('#score').css('width',(config.stage.width * config.pixel.size)+'px')
 	$('#score').css('top',((config.stage.height-config.stage.groundY) * config.pixel.size)+'px')
 	$('#score').css('font-size',config.bird.size * config.pixel.size)
@@ -397,25 +417,48 @@ renderDOM = () ->
 	$('#score').css('text-shadow',"
 		#{z}px #{z}px 0 #000
 	")
-intro = () ->
-	$('#score').text bird.score
+
+reset = () ->
+	console.log 'reset'
+	createjs.Ticker.setPaused(true)
 	lastTime = bigbang = createjs.Ticker.getTime()
-	status = 'intro'
+	bird.alive = true
+	bird.score = 0
+	bird.pos =
+		x : 0
+		x0 : 0
+		y0 : config.stage.height/2
+		y : config.stage.height/2
+	bird.v =
+		x : config.bird.v.x0
+		y : 0
+	birdView.rotation = 0
+	pipeMan.reset()
+	createjs.Ticker.setPaused(false)
+intro = () ->
+
+	reset()
+	$('#score').text bird.score
+	$('#start').css 'display','none'
+	handleTick()
 	handler.touch = ()->
 		flap()
 		play()
+	status = 'intro'
+	console.log status
 play = () ->
-	console.log 'play'
 	bigbang = createjs.Ticker.getTime()
 	handler.touch = flap
 	# handler.touch = null
 	# stage.addEventListener 'stagemousedown', flap
 	startTime = createjs.Ticker.getTime()
-	pipeMan.reset()
 	status = 'play'
+	console.log status
 gameover = () ->
+	handler.touch = null
+	$('#start').css 'display','inherit'
 	status = 'gameover'
-
+	console.log status
 flap = ()->
 	if bird.alive and bird.pos.y > config.bird.height/2
 		createjs.Sound.play('flapSound') unless muted

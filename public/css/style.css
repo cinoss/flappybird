@@ -86,3 +86,12 @@ canvas {
 
 	color: #5adb5a;
 }
+#start {
+	margin-left: auto !important;
+	margin-right: auto !important;
+	background: url(../img/start.gif);
+	position: absolute;
+	width: 100px;
+	height: 200px;
+	display: none;
+}
