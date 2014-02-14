@@ -86,10 +86,13 @@ init = () ->
 	bird.v =
 		x : config.bird.v.x0
 		y : 0
+
 	scaleRatio = config.pixel.size/config.pixel.originalSize
-	ground.scaleY = ground.scaleX = scaleRatio
-	building.scaleY = building.scaleX = scaleRatio
-	cloud.scaleY = cloud.scaleX = scaleRatio
+	scaleMatrix = new createjs.Matrix2D
+	scaleMatrix.scale(scaleRatio,scaleRatio)
+	# ground.scaleY = ground.scaleX = scaleRatio
+	# building.scaleY = building.scaleX = scaleRatio
+	# cloud.scaleY = cloud.scaleX = scaleRatio
 
 
 main = () ->
@@ -101,6 +104,8 @@ main = () ->
 	canvas.height = Math.max(canvas.height,720)
 	if canvas.width > canvas.height * 2
 		canvas.width = Math.round(canvas.height * 2)
+	# if canvas.width > 550
+	# 	canvas.width = 550
 	$('#stage').append(canvas);
 	$('#stage').height(canvas.height)
 
@@ -139,7 +144,8 @@ main = () ->
 
 	# /* Ticker */
 	
-	createjs.Ticker.addEventListener("tick", stage);
+	# createjs.Ticker.addEventListener("tick", stage);
+	createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
 	createjs.Ticker.setFPS(FPS)
 
 	if ('ontouchstart' in document.documentElement) 
@@ -165,9 +171,12 @@ main = () ->
 			# console.log 4
 			document.onmousedown = handleKeyDown
 			document.onmouseup = handleKeyUp
+	renderDOM()
+
 handleKeyDown = () ->
 	console.log 'touch'
-	handler.touch()
+	if handler.touch
+		handler.touch()
 	return
 handleKeyUp = () ->
 	return
@@ -196,10 +205,9 @@ addMainView = ()->
 	intro()
 	console.log '---- main -----'
 	renderBasic()
-	renderDOM()
 	ground.y = config.stage.groundY * config.pixel.size
 	building.y = (config.stage.groundY-config.stage.buildingHeight) * config.pixel.size
-	cloud.y = (config.stage.groundY-config.stage.buildingHeight-config.stage.cloudHeight) * config.pixel.size
+	cloud.y = (config.stage.groundY-config.stage.buildingHeight-config.stage.cloudHeight) * config.pixel.size + 1
 		
 
 	stage.addChild background, building, cloud
@@ -266,7 +274,7 @@ class PipeManager
 				if bird.pos.y > pipe.y1
 					console.log 'hit 4'
 					return false 
-			if bird.pos.x > pipe.x
+			if pipe.score and bird.pos.x > pipe.x
 				bird.score += pipe.score
 				pipe.score = 0
 		if bird.pos.y >= config.stage.groundY - config.bird.effectiveRadius
@@ -282,9 +290,9 @@ theta = (dx,dy)->
 		return 360 + t * 15
 
 handleTick = () ->
+	currentTime = (new Date()).getTime()
 	switch status
 		when 'intro'
-			currentTime = (new Date()).getTime()
 			t = (currentTime - bigbang)/1000
 
 			groundPosition = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)
@@ -301,10 +309,13 @@ handleTick = () ->
 
 			bird.pos.y = bird.pos.y0 + Math.sin(t*5)*config.bird.effectiveRadius
 			birdView.y = (bird.pos.y)* config.pixel.size
+			stage.update()
 		when 'play'
-			currentTime = (new Date()).getTime()
 			t = (currentTime - startTime)/1000
 
+			# $('#info').text 
+			console.log Math.round(1000/(currentTime-lastTime))+'fps'
+			lastTime = currentTime
 			bird.pos.y = bird.pos.y0 + bird.v.y * t + 0.5 * config.stage.g * Math.pow(t, 2)
 			if bird.pos.y > config.stage.groundY - config.bird.effectiveRadius
 				bird.pos.y = config.stage.groundY - config.bird.effectiveRadius
@@ -327,22 +338,28 @@ handleTick = () ->
 
 				oldScore = bird.score
 				unless pipeMan.checkBird()
+					createjs.Sound.play('hitSound') unless muted
+					bird.alive = false
 					if bird.pos.y < config.stage.groundY - config.bird.effectiveRadius
 						createjs.Sound.play('fallSound') unless muted
-						createjs.Sound.play('hitSound') unless muted
-					startTime = (new Date()).getTime()
-					bird.alive = false
-					# console.log 'hit'
-					bird.v.x = 0
-					bird.pos.y0 = bird.pos.y
-					bird.pos.x0 = bird.pos.x
-					bird.v.y = config.bird.v.y0/2
+						startTime = (new Date()).getTime()
+						# console.log 'hit'
+						bird.v.x = 0
+						bird.pos.y0 = bird.pos.y
+						bird.pos.x0 = bird.pos.x
+						bird.v.y = config.bird.v.y0/2
+					else
+						gameover()
 				if oldScore < bird.score
 					$('#score').text(bird.score);
-					createjs.Sound.play('scoreSound') unless muted		
-
+					createjs.Sound.play('scoreSound') unless muted
+			else if bird.pos.y >= config.stage.groundY - config.bird.effectiveRadius
+				createjs.Sound.play('hitSound') unless muted
+				gameover()
+			stage.update()
 
 		
+	# console.log ['calc time',(new Date()).getTime()-currentTime]
 	# console.log 'tick'
 	return
 
@@ -355,13 +372,14 @@ renderBasic = () ->
 renderDOM = () ->
 	$('#score').css('width',(config.stage.width * config.pixel.size)+'px')
 	$('#score').css('top',((config.stage.height-config.stage.groundY) * config.pixel.size)+'px')
-	$('#score').css('font-size',config.bird.size * config.pixel.size);
-	$('#score').text(bird.score)
+	$('#score').css('font-size',config.bird.size * config.pixel.size)
+	$('#score').text 'loading..'
 	z = config.pixel.size
 	$('#score').css('text-shadow',"
 		#{z}px #{z}px 0 #000
 	")
 intro = () ->
+	$('#score').text bird.score
 	status = 'intro'
 	handler.touch = ()->
 		flap()
@@ -369,9 +387,13 @@ intro = () ->
 play = () ->
 	console.log 'play'
 	handler.touch = flap
+	# handler.touch = null
+	# stage.addEventListener 'stagemousedown', flap
 	startTime = (new Date()).getTime()
 	pipeMan = new PipeManager 1*(config.stage.width), config.pipe.distance+config.pipe.width, pairs.slice()
 	status = 'play'
+gameover = () ->
+	status = 'gameover'
 
 flap = ()->
 	if bird.alive and bird.pos.y > config.bird.height/2
@@ -393,25 +415,25 @@ renderShape = (assetId, img) ->
 			ground.graphics.drawRect 0, 0, 2*config.pixel.originalSize * config.stage.width, (config.stage.height-config.stage.groundY) * config.pixel.originalSize
 			ground.graphics.endFill()
 
-			ground.graphics.beginBitmapFill img
-			ground.graphics.drawRect 0, 0, 2*config.pixel.originalSize * config.stage.width, img.height
+			ground.graphics.beginBitmapFill img, 'repeat', scaleMatrix
+			ground.graphics.drawRect 0, 0, config.pixel.size * config.stage.width + img.width * scaleRatio, img.height * scaleRatio
 			ground.graphics.endFill()
 
 			ground.cache 0, 0, 2*config.pixel.originalSize * config.stage.width, (config.stage.height-config.stage.groundY) * config.pixel.originalSize
 
 		when 'buildingTile'
-			building.graphics.beginBitmapFill img
-			building.graphics.drawRect 0, 0, 2*config.pixel.originalSize * config.stage.width, img.height
+			building.graphics.beginBitmapFill img, 'repeat', scaleMatrix
+			building.graphics.drawRect 0, 0, config.pixel.size * config.stage.width, img.height * scaleRatio
 			building.graphics.endFill()
 
-			building.cache 0, 0, 2*config.pixel.originalSize * config.stage.width, img.height
+			building.cache 0, 0, config.pixel.size * config.stage.width, img.height * scaleRatio
 
 		when 'cloudTile'
-			cloud.graphics.beginBitmapFill img
-			cloud.graphics.drawRect 0, 0, 2*config.pixel.originalSize * config.stage.width, img.height
+			cloud.graphics.beginBitmapFill img, 'repeat', scaleMatrix
+			cloud.graphics.drawRect 0, 0, config.pixel.size * config.stage.width, img.height * scaleRatio
 			cloud.graphics.endFill()
 
-			cloud.cache 0, 0, 2*config.pixel.originalSize * config.stage.width, img.height
+			cloud.cache 0, 0, config.pixel.size * config.stage.width, img.height * scaleRatio
 
 		when 'pipeTile'
 			for i in [0..config.pipe.num]
