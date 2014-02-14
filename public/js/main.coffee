@@ -149,7 +149,8 @@ main = () ->
 
 
 	stage = new createjs.Stage(canvas)
-	stage.mouseEventsEnabled = true
+	stage.mouseEnabled = true
+	createjs.Touch.enable(stage);
 	
 	init()
 
