@@ -1,9 +1,9 @@
-FPS = 60
+FPS = 50
 
 muted = false
 
 startTime = 0
-lastTime = bigbang = (new Date()).getTime()
+lastTime = bigbang = 0
 
 # mainView = new Container
 config = null
@@ -61,8 +61,8 @@ init = () ->
 		height : 16
 		width : 21
 		effectiveRadius : 12/2
-		# screenX : config.pipe.distance
-		screenX : (config.stage.width/3)
+		screenX : Math.min(config.pipe.distance + config.pipe.width, config.stage.width/3)
+		# screenX : (config.stage.width/3)
 		v : 
 			x0 : 80
 			y0 : -180
@@ -105,7 +105,7 @@ main = () ->
 	if canvas.width > canvas.height * 2
 		canvas.width = Math.round(canvas.height * 2)
 	# if canvas.width > 550
-	# 	canvas.width = 550
+		# canvas.width = 550
 	$('#stage').append(canvas);
 	$('#stage').height(canvas.height)
 
@@ -124,16 +124,16 @@ main = () ->
 	
 
 	manifest = [
-		{ src:'/img/floor.jpg', id:'groundTile'},
-		{ src:'/img/buildings.jpg', id:'buildingTile'},
-		{ src:'/img/clouds.jpg', id:'cloudTile'},
-		{ src:'/img/pipe.gif', id:'pipeTile'},
-		{ src:'/img/birds.gif', id:'birdSeq'},
+		{ src: '/img/floor.jpg', 	id: 'groundTile'},
+		{ src: '/img/buildings.jpg', 	id: 'buildingTile'},
+		{ src: '/img/clouds.jpg', 	id: 'cloudTile'},
+		{ src: '/img/pipe.gif', 	id: 'pipeTile'},
+		{ src: '/img/birds.gif', 	id: 'birdSeq'},
 
-		{ src: '/audio/flap.mp3', id :'flapSound'},
-		{ src: '/audio/hit.mp3', id :'hitSound'},
-		{ src: '/audio/fall.mp3', id :'fallSound'},
-		{ src: '/audio/score.mp3', id :'scoreSound'},
+		{ src: '/audio/flap.mp3', 	id: 'flapSound'},
+		{ src: '/audio/hit.mp3', 	id: 'hitSound'},
+		{ src: '/audio/fall.mp3', 	id: 'fallSound'},
+		{ src: '/audio/score.mp3', 	id: 'scoreSound'},
 	]
 
 	loadQueue.installPlugin(createjs.Sound)
@@ -142,11 +142,7 @@ main = () ->
 	loadQueue.on('fileload', handleFileLoad);
 	loadQueue.loadManifest(manifest)
 
-	# /* Ticker */
-	
-	# createjs.Ticker.addEventListener("tick", stage);
-	createjs.Ticker.timingMode = createjs.Ticker.RAF_SYNCHED;
-	createjs.Ticker.setFPS(FPS)
+	setupTicker()
 
 	if ('ontouchstart' in document.documentElement) 
 		console.log 1
@@ -172,9 +168,16 @@ main = () ->
 			document.onmousedown = handleKeyDown
 			document.onmouseup = handleKeyUp
 	renderDOM()
+setupTicker = () ->
+	# /* Ticker */
+	
+	# createjs.Ticker.addEventListener("tick", stage);
+	createjs.Ticker.timingMode = createjs.Ticker.RAF;
+	# createjs.Ticker.setFPS(FPS)
+	# createjs.Ticker.maxDelta = 20
 
 handleKeyDown = () ->
-	console.log 'touch'
+	# console.log 'touch'
 	if handler.touch
 		handler.touch()
 	return
@@ -212,7 +215,7 @@ addMainView = ()->
 
 	stage.addChild background, building, cloud
 	for pair in pairs
-		pair.y = Math.random() * 400
+		# pair.y = Math.random() * 400
 		stage.addChild pair
 		pair.x = -1000
 		# break
@@ -245,7 +248,7 @@ class PipeManager
 			@pipes.push @genPipe()
 		for pipe in @pipes
 			pipe.screenX = pipe.x - viewportX
-			pipe.pair.x = pipe.screenX*config.pixel.size
+			pipe.pair.x = (pipe.screenX*config.pixel.size)
 		while @pipes.length > 0 and @pipes[0].screenX < -config.pipe.width
 			@freePairs.push @pipes[0].pair
 			@pipes.shift()
@@ -290,11 +293,12 @@ theta = (dx,dy)->
 		return 360 + t * 15
 
 handleTick = () ->
-	currentTime = (new Date()).getTime()
+	currentTime = createjs.Ticker.getTime()
 	switch status
 		when 'intro'
 			t = (currentTime - bigbang)/1000
 
+			# console.log currentTime-bigbang
 			groundPosition = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)
 			ground.x = groundPosition % (config.stage.groundTileWidth * config.pixel.size)
 
@@ -313,7 +317,11 @@ handleTick = () ->
 		when 'play'
 			t = (currentTime - startTime)/1000
 
-			# $('#info').text 
+			$('#info').text [
+				Math.round(createjs.Ticker.getMeasuredFPS())
+				# ,'<br/>'
+				,Math.round(createjs.Ticker.getMeasuredTickTime(1))
+			]
 			console.log Math.round(1000/(currentTime-lastTime))+'fps'
 			lastTime = currentTime
 			bird.pos.y = bird.pos.y0 + bird.v.y * t + 0.5 * config.stage.g * Math.pow(t, 2)
@@ -328,21 +336,21 @@ handleTick = () ->
 				wingState = Math.round((currentTime-bigbang)/60)%3
 
 			birdView.y = (bird.pos.y)* config.pixel.size
-			birdView.rotation = angle
+			# birdView.rotation = angle
 			birdView.gotoAndStop(wingState)
 
 			if bird.alive
 				groundPosition = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)
-				ground.x = groundPosition % (config.stage.groundTileWidth * config.pixel.size)
+				ground.x = (groundPosition % (config.stage.groundTileWidth * config.pixel.size))
 				pipeMan.update(bird.pos.x - config.bird.screenX)
 
 				oldScore = bird.score
-				unless pipeMan.checkBird()
+				unless true # pipeMan.checkBird()
 					createjs.Sound.play('hitSound') unless muted
 					bird.alive = false
 					if bird.pos.y < config.stage.groundY - config.bird.effectiveRadius
 						createjs.Sound.play('fallSound') unless muted
-						startTime = (new Date()).getTime()
+						startTime = createjs.Ticker.getTime()
 						# console.log 'hit'
 						bird.v.x = 0
 						bird.pos.y0 = bird.pos.y
@@ -359,7 +367,7 @@ handleTick = () ->
 			stage.update()
 
 		
-	# console.log ['calc time',(new Date()).getTime()-currentTime]
+	# console.log ['calc time',createjs.Ticker.getTime()-currentTime]
 	# console.log 'tick'
 	return
 
@@ -380,6 +388,7 @@ renderDOM = () ->
 	")
 intro = () ->
 	$('#score').text bird.score
+	lastTime = bigbang = createjs.Ticker.getTime()
 	status = 'intro'
 	handler.touch = ()->
 		flap()
@@ -389,8 +398,8 @@ play = () ->
 	handler.touch = flap
 	# handler.touch = null
 	# stage.addEventListener 'stagemousedown', flap
-	startTime = (new Date()).getTime()
-	pipeMan = new PipeManager 1*(config.stage.width), config.pipe.distance+config.pipe.width, pairs.slice()
+	startTime = createjs.Ticker.getTime()
+	pipeMan = new PipeManager .5*(config.stage.width), config.pipe.distance+config.pipe.width, pairs.slice()
 	status = 'play'
 gameover = () ->
 	status = 'gameover'
@@ -401,7 +410,7 @@ flap = ()->
 		# flapSound.play() unless muted
 		# onFrame false
 		handleTick()
-		startTime = (new Date()).getTime()
+		startTime = createjs.Ticker.getTime()
 		bird.pos.y0 = bird.pos.y
 		bird.pos.x0 = bird.pos.x
 		# console.log(startTime + " y=" + bird.pos.y0)
@@ -457,6 +466,7 @@ renderShape = (assetId, img) ->
 				pairs.push pair
 		when 'birdSeq'
 			data = 
+				framerate: 20
 				images: [img]
 				frames: 
 					width : config.bird.width * config.pixel.originalSize

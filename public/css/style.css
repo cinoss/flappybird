@@ -24,10 +24,18 @@ canvas {
 	z-index: 0;
 }
 #info {
-	font-family: 'Tahoma';
+	font-family: "Courier New", "Lucida Console", Monaco, monospace;
 	position: absolute;
 	top: 300px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+
 }
+
 #stage {
 	min-height: 640px;
 	margin-left: auto !important;
