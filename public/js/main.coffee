@@ -15,6 +15,7 @@ building = new createjs.Shape
 cloud = new createjs.Shape 
 background = new createjs.Shape
 pairs = []
+pairContainer = new createjs.Container
 birdView = null
 
 pipeMan = null
@@ -48,7 +49,7 @@ init = () ->
 		# height : stage.canvas.height/config.pixel.size
 		# width : stage.canvas.width/config.pixel.size
 
-	config.pixel.size = (stage.canvas.height/(config.pipe.gap * 4.5))
+	config.pixel.size = (stage.canvas.height/(config.pipe.gap * 4))
 	config.pixel.size = Math.floor(config.pixel.size * 2)/2
 	config.stage.height = stage.canvas.height/config.pixel.size
 	config.stage.width = stage.canvas.width/config.pixel.size
@@ -66,7 +67,7 @@ init = () ->
 		v : 
 			x0 : 80
 			y0 : -180
-	config.stage.gapMax = 2 * config.pipe.gap
+	config.stage.gapMax = 1.7 * config.pipe.gap
 	config.stage.groundY = config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2 + config.pipe.gap + 2 * config.pipe.topHeight
 
 	#config for speed
@@ -94,18 +95,17 @@ init = () ->
 	# building.scaleY = building.scaleX = scaleRatio
 	# cloud.scaleY = cloud.scaleX = scaleRatio
 
-
 main = () ->
 	canvas = document.getElementById('stage')
 	canvas = document.createElement("canvas");
 	canvas.height = Math.min($(window).height(),5500) || 480;
 	canvas.width = Math.min($(window).width(),9000) || 640;
 	canvas.height *= 3/4
-	canvas.height = Math.max(canvas.height,720)
-	if canvas.width > canvas.height * 2
-		canvas.width = Math.round(canvas.height * 2)
+	canvas.height = Math.max(canvas.height,640)
+	# if canvas.width > canvas.height * 2
+	# 	canvas.width = Math.round(canvas.height * 2)
 	# if canvas.width > 550
-		# canvas.width = 550
+	# 	canvas.width = 550
 	$('#stage').append(canvas);
 	$('#stage').height(canvas.height)
 
@@ -211,24 +211,27 @@ addMainView = ()->
 	ground.y = config.stage.groundY * config.pixel.size
 	building.y = (config.stage.groundY-config.stage.buildingHeight) * config.pixel.size
 	cloud.y = (config.stage.groundY-config.stage.buildingHeight-config.stage.cloudHeight) * config.pixel.size + 1
-		
+	
 
 	stage.addChild background, building, cloud
 	for pair in pairs
 		# pair.y = Math.random() * 400
-		stage.addChild pair
+		pairContainer.addChild pair
 		pair.x = -1000
 		# break
+	stage.addChild pairContainer
 	birdView.y = -100;
 	birdView.x = (config.bird.screenX) * config.pixel.size
 	stage.addChild birdView
 	stage.addChild ground
+	pipeMan = new PipeManager .5*(config.stage.width), config.pipe.distance+config.pipe.width, pairs.slice()
 	stage.update();
 	return
 class PipeManager
 	constructor: (@nextX, @step, @freePairs) ->
 		@pipes = []
-
+	reset : () ->
+		return
 	genPipe : () ->
 		pipe =
 			y : (Math.random())*config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2
@@ -244,15 +247,23 @@ class PipeManager
 		@nextX += @step
 		return pipe
 	update : (viewportX) ->
+		reCache = false
 		while @freePairs.length > 0
 			@pipes.push @genPipe()
+			reCache = true
 		for pipe in @pipes
 			pipe.screenX = pipe.x - viewportX
-			pipe.pair.x = (pipe.screenX*config.pixel.size)
+			if reCache
+				pipe.pair.x = (pipe.screenX - @pipes[0].screenX)*config.pixel.size
+		pairContainer.x =  @pipes[0].screenX * config.pixel.size
+		if reCache
+			pairContainer.cache 0, 0, @pipes.length * @step * config.pixel.size, config.stage.groundY * config.pixel.size
+
 		while @pipes.length > 0 and @pipes[0].screenX < -config.pipe.width
 			@freePairs.push @pipes[0].pair
 			@pipes.shift()
 			break
+
 		return
 	checkBird : () ->
 		# console.log "+++++++++++"
@@ -299,8 +310,8 @@ handleTick = () ->
 			t = (currentTime - bigbang)/1000
 
 			# console.log currentTime-bigbang
-			groundPosition = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)
-			ground.x = groundPosition % (config.stage.groundTileWidth * config.pixel.size)
+			# groundPosition = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)
+			# ground.x = groundPosition % (config.stage.groundTileWidth * config.pixel.size)
 
 			# buildingState = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)/4
 			# $('#buildings').css 'background-position', buildingState+"px 0px"
@@ -308,6 +319,7 @@ handleTick = () ->
 
 			wingState = Math.round((currentTime-bigbang)/150)%3
 			birdView.gotoAndStop(wingState)
+			pipeMan.update(bird.pos.x - config.bird.screenX)
 			# $('#bird').css 'background-position', "0px #{wingState*config.bird.height*config.pixel.size}px"
 
 
@@ -318,11 +330,10 @@ handleTick = () ->
 			t = (currentTime - startTime)/1000
 
 			$('#info').text [
-				Math.round(createjs.Ticker.getMeasuredFPS())
-				# ,'<br/>'
-				,Math.round(createjs.Ticker.getMeasuredTickTime(1))
+				Math.round(createjs.Ticker.getMeasuredFPS())+'FPS'
+				# ,Math.round(createjs.Ticker.getMeasuredTickTime(1))
 			]
-			console.log Math.round(1000/(currentTime-lastTime))+'fps'
+			# console.log Math.round(1000/(currentTime-lastTime))+'fps'
 			lastTime = currentTime
 			bird.pos.y = bird.pos.y0 + bird.v.y * t + 0.5 * config.stage.g * Math.pow(t, 2)
 			if bird.pos.y > config.stage.groundY - config.bird.effectiveRadius
@@ -336,7 +347,7 @@ handleTick = () ->
 				wingState = Math.round((currentTime-bigbang)/60)%3
 
 			birdView.y = (bird.pos.y)* config.pixel.size
-			# birdView.rotation = angle
+			birdView.rotation = angle
 			birdView.gotoAndStop(wingState)
 
 			if bird.alive
@@ -345,7 +356,7 @@ handleTick = () ->
 				pipeMan.update(bird.pos.x - config.bird.screenX)
 
 				oldScore = bird.score
-				unless true # pipeMan.checkBird()
+				unless pipeMan.checkBird()
 					createjs.Sound.play('hitSound') unless muted
 					bird.alive = false
 					if bird.pos.y < config.stage.groundY - config.bird.effectiveRadius
@@ -395,11 +406,12 @@ intro = () ->
 		play()
 play = () ->
 	console.log 'play'
+	bigbang = createjs.Ticker.getTime()
 	handler.touch = flap
 	# handler.touch = null
 	# stage.addEventListener 'stagemousedown', flap
 	startTime = createjs.Ticker.getTime()
-	pipeMan = new PipeManager .5*(config.stage.width), config.pipe.distance+config.pipe.width, pairs.slice()
+	pipeMan.reset()
 	status = 'play'
 gameover = () ->
 	status = 'gameover'

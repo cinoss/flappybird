@@ -1,16 +1,21 @@
 body {
-	font-family: "04B_19__", "Lucida Console", Monaco, monospace;
+	font-family: "04B_19__","04B_19__ie", "Lucida Console", Monaco, monospace;
 	/*min-height: 1000px;*/
 	padding: 0px;
 	border: 0px;
 	margin: 0px;
-	/*overflow: hidden;*/
+	overflow: hidden;
 	/*background: url(../img/background.png);*/
 }
 @font-face {
 	font-family: "04B_19__";
 	src: url(../font/04B_19__.woff);
 	/*src: url(../font/04B_19__.ttf);*/
+	/*src: url(../font/04B_19__.svg);*/
+}
+@font-face {
+	font-family: "04B_19__ie";
+	src: url(../font/04B_19__.eot);
 }
 /*div.wrap {height:100%; overflow:hidden;}*/
 canvas {
@@ -19,14 +24,14 @@ canvas {
     image-rendering: -webkit-optimize-contrast;
     image-rendering: optimize-contrast;
     -ms-interpolation-mode: nearest-neighbor;
-	margin-left: auto !important;
+	margin-left: auto !important;	
 	margin-right: auto !important;
 	z-index: 0;
 }
 #info {
 	font-family: "Courier New", "Lucida Console", Monaco, monospace;
 	position: absolute;
-	top: 300px;
+	/*top: 300px;*/
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
