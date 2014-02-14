@@ -62,8 +62,8 @@ init = () ->
 		height : 16
 		width : 21
 		effectiveRadius : 12/2
-		screenX : Math.min(config.pipe.distance + config.pipe.width, config.stage.width/3)
-		# screenX : (config.stage.width/3)
+		# screenX : Math.min(config.pipe.distance + config.pipe.width, config.stage.width/3)
+		screenX : (config.stage.width/3)
 		v : 
 			x0 : 80
 			y0 : -180
