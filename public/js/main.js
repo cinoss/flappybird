@@ -201,7 +201,6 @@ setupTicker = function() {
 };
 
 handleKeyDown = function(e) {
-  e.preventDefault();
   if (handler.touch) {
     handler.touch();
   }
@@ -357,10 +356,17 @@ PipeManager = (function() {
 theta = function(dx, dy) {
   var t;
   t = dy / (Math.abs(dx) + Math.abs(dy));
+  t = (t + 1) / 2;
+  t = createjs.Ease.getPowIn(2.4)(t);
+  t = t * 2 - 1;
   if (t > 0) {
     return t * 90;
   } else {
-    return 360 + t * 15;
+    if (-t * 90 > 15) {
+      return 360 - 15;
+    } else {
+      return 360 + t * 15;
+    }
   }
 };
 

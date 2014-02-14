@@ -196,7 +196,7 @@ setupTicker = () ->
 	# createjs.Ticker.maxDelta = 20
 
 handleKeyDown = (e) ->
-	e.preventDefault()
+	# e.preventDefault()
 	if handler.touch
 		handler.touch()
 	return
@@ -323,11 +323,24 @@ class PipeManager
 		return true
 theta = (dx,dy)->
 	t = dy/(Math.abs(dx)+Math.abs(dy))
+	# t = t*4-3
+	# if t<0
+	# 	t = t/7
+	# else
+	# 	t = t/1
+
+	t = (t+1) / 2
+	t = createjs.Ease.getPowIn(2.4)(t)
+	t = t*2-1
+
 	# t = Math.atan2(dy,dx)/(2*Math.PI)
 	if t>0
 		return t * 90
 	else 
-		return 360 + t * 15
+		if -t*90 > 15
+			return 360 - 15
+		else
+			return 360 + t * 15
 
 handleTick = () ->
 	currentTime = createjs.Ticker.getTime()
