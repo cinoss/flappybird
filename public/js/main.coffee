@@ -69,11 +69,11 @@ init = () ->
 	config.scorePanel = 
 		height: 285/5
 		width: 565/5
-	config.pixel.size = (stage.canvas.height/(config.pipe.gap * 4))
-	config.pixel.size = Math.floor(config.pixel.size * 2)/2
+	config.pixel.size   = (stage.canvas.height/(config.pipe.gap * 4))
+	config.pixel.size   = Math.floor(config.pixel.size)
 	config.stage.height = stage.canvas.height/config.pixel.size
-	config.stage.width = stage.canvas.width/config.pixel.size
-	config.pipe.num = Math.round(config.stage.width / (config.pipe.distance + config.pipe.width) ) 
+	config.stage.width  = stage.canvas.width/config.pixel.size
+	config.pipe.num     = Math.round(config.stage.width / (config.pipe.distance + config.pipe.width) ) 
 	# config.pipe.num = 1
 	config.bird =
 		size : 21
@@ -85,19 +85,19 @@ init = () ->
 		v : 
 			x0 : 80
 			y0 : -180
-	config.stage.gapMax = 1.8 * config.pipe.gap
+	config.stage.gapMax  = 1.8 * config.pipe.gap
 	config.stage.groundY = config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2 + config.pipe.gap + 2 * config.pipe.topHeight
 
 	#config for speed
-	ratio = 1
-	config.stage.g = 650 * ratio
+	ratio            = 1
+	config.stage.g   = 650 * ratio
 	config.bird.v.x0 = 60 * ratio
 	config.bird.v.x0 = config.pipe.distance * 1.2* ratio
 	config.bird.v.y0 = -195
-	bird = {}
-	bird.alive = true
-	bird.score = 0
-	bird.pos =
+	bird             = {}
+	bird.alive       = true
+	bird.score       = 0
+	bird.pos         =
 		x : 0
 		x0 : 0
 		y0 : config.stage.height/2
@@ -121,7 +121,7 @@ loadAsset = () ->
 		{ src: '/img/birds.gif', 	id: 'birdSeq'},
 		{ src: '/img/start.gif', 	id: 'startButton'},
 		{ src: '/img/score-panel.gif', 	id: 'scorePanel'},
-
+		
 		{ src: '/audio/flap.mp3', 	id: 'flapSound'},
 		{ src: '/audio/hit.mp3', 	id: 'hitSound'},
 		{ src: '/audio/fall.mp3', 	id: 'fallSound'},
@@ -134,10 +134,10 @@ loadAsset = () ->
 	loadQueue.on('fileload', handleFileLoad);
 	loadQueue.loadManifest(manifest)
 main = () ->
-	canvas = document.getElementById('stage')
-	canvas = document.createElement("canvas");
+	canvas        = document.getElementById('stage')
+	canvas        = document.createElement("canvas");
 	canvas.height = Math.min($(window).height(),5500) || 480;
-	canvas.width = Math.min($(window).width(),9000) || 640;
+	canvas.width  = Math.min($(window).width(),9000) || 640;
 	canvas.height *= 3/4
 	canvas.height = Math.max(canvas.height,640)
 	# if canvas.width > canvas.height * 2
@@ -148,9 +148,9 @@ main = () ->
 	$('#stage').height(canvas.height)
 
 
-	stage = new createjs.Stage(canvas)
+	stage              = new createjs.Stage(canvas)
 	stage.mouseEnabled = true
-	createjs.Touch.enable(stage);
+	createjs.Touch.enable stage
 	
 	init()
 
@@ -162,39 +162,14 @@ main = () ->
 	
 
 	loadAsset()
-
 	renderText()
-
 	setupTicker()
 
-	# if ('ontouchstart' in document.documentElement) 
-	# 	canvas.addEventListener 'touchstart', (e) ->
-	# 		handleKeyDown()
-	# 	, false
-
-	# 	canvas.addEventListener 'touchend', (e) ->
-	# 		handleKeyUp();
-	# 	, false
-	# else 
-	# 	document.onkeydown = handleKeyDown;
-	# 	document.onkeyup = handleKeyUp;
-
-	# 	if (window.navigator.msPointerEnabled) 
-	# 		document.getElementById('body').addEventListener "MSPointerDown", handleKeyDown, false
-	# 		document.getElementById('body').addEventListener "MSPointerUp", handleKeyUp, false
-	# 	else 
-	# 		document.onmousedown = handleKeyDown
-	# 		document.onmouseup = handleKeyUp
 	stage.on 'stagemousedown', handleKeyDown
 	$(document).on 'keydown', handleKeyDown
 	renderDOM()
 setupTicker = () ->
-	# /* Ticker */
-	
-	# createjs.Ticker.addEventListener("tick", stage);
 	createjs.Ticker.timingMode = createjs.Ticker.RAF;
-	# createjs.Ticker.setFPS(FPS)
-	# createjs.Ticker.maxDelta = 20
 
 handleKeyDown = (e) ->
 	# e.preventDefault()
@@ -223,15 +198,15 @@ handleFileLoad = (event) ->
 addMainView = ()->
 	createjs.Ticker.addEventListener("tick", handleTick);
 	renderBasic()
-	ground.y = config.stage.groundY * config.pixel.size
-	building.y = (config.stage.groundY-config.stage.buildingHeight) * config.pixel.size
-	cloud.y = (config.stage.groundY-config.stage.buildingHeight-config.stage.cloudHeight) * config.pixel.size + 1
-
+	ground.y              = config.stage.groundY * config.pixel.size
+	building.y            = (config.stage.groundY-config.stage.buildingHeight) * config.pixel.size
+	cloud.y               = (config.stage.groundY-config.stage.buildingHeight-config.stage.cloudHeight) * config.pixel.size + 1
+	
 	scorePanelContainer.y = (config.stage.height - 2*config.scorePanel.height)/2 * config.pixel.size
 	scorePanelContainer.x = (config.stage.width - config.scorePanel.width)/2 * config.pixel.size
-
-	startButton.y = (config.stage.height + config.scorePanel.height)/2 * config.pixel.size
-	startButton.x = (config.stage.width - config.startButton.width)/2 * config.pixel.size
+	
+	startButton.y         = (config.stage.height + config.scorePanel.height)/2 * config.pixel.size
+	startButton.x         = (config.stage.width - config.startButton.width)/2 * config.pixel.size
 	startButton.on 'click', intro
 
 
@@ -265,19 +240,19 @@ class PipeManager
 		@nextX = @nextXsave
 		return
 	genPipe : () ->
-		r = Math.round((Math.random() * 5))/5
+		r    = Math.round((Math.random() * 5))/5
 		pipe =
-			y : r*config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2
-			x : @nextX
-			score : 1
+			y    : r*config.stage.gapMax + (config.stage.height - config.stage.gapMax - config.pipe.gap)/2
+			x    : @nextX
+			score: 1
 			pair : @freePairs.pop()
 		# $("##{pipe.pair.id}").css('top',(pipe.y+(config.stage.height-config.stage.gapMax-config.pipe.gap)/2)*config.pixel.size )
 		pipe.pair.y = (pipe.y)*config.pixel.size
-		pipe.x1 = pipe.x + config.pipe.width + config.bird.effectiveRadius
-		pipe.x0 = pipe.x - config.bird.effectiveRadius
-		pipe.y0 = pipe.y + config.bird.effectiveRadius
-		pipe.y1 = pipe.y + config.pipe.gap - config.bird.effectiveRadius	
-		@nextX += @step
+		pipe.x1     = pipe.x + config.pipe.width + config.bird.effectiveRadius
+		pipe.x0     = pipe.x - config.bird.effectiveRadius
+		pipe.y0     = pipe.y + config.bird.effectiveRadius
+		pipe.y1     = pipe.y + config.pipe.gap - config.bird.effectiveRadius	
+		@nextX      += @step
 		return pipe
 	update : (viewportX) ->
 		reCache = false
@@ -287,8 +262,8 @@ class PipeManager
 		for pipe in @pipes
 			pipe.screenX = pipe.x - viewportX
 			if reCache
-				pipe.pair.x = (pipe.screenX - @pipes[0].screenX)*config.pixel.size
-		pairContainer.x =  @pipes[0].screenX * config.pixel.size
+				pipe.pair.x = Math.round((pipe.screenX - @pipes[0].screenX)*config.pixel.size)
+		pairContainer.x =  Math.round(@pipes[0].screenX * config.pixel.size)
 		if reCache
 			pairContainer.cache 0, 0, @pipes.length * @step * config.pixel.size, config.stage.groundY * config.pixel.size
 
@@ -384,13 +359,13 @@ handleTick = () ->
 			else
 				wingState = Math.round((currentTime-bigbang)/60)%3
 
-			birdView.y = (bird.pos.y)* config.pixel.size
-			birdView.rotation = angle
+			birdView.y = Math.round(bird.pos.y * config.pixel.size)
+			birdView.rotation = Math.round(angle)
 			birdView.gotoAndStop(wingState)
 
 			if bird.alive
 				groundPosition = -(currentTime-bigbang)/1000 * (config.bird.v.x0*config.pixel.size)
-				ground.x = (groundPosition % (config.stage.groundTileWidth * config.pixel.size))
+				ground.x = Math.round(groundPosition % (config.stage.groundTileWidth * config.pixel.size))
 				pipeMan.update(bird.pos.x - config.bird.screenX)
 
 				oldScore = bird.score
@@ -399,11 +374,11 @@ handleTick = () ->
 					bird.alive = false
 					if bird.pos.y < config.stage.groundY - config.bird.effectiveRadius
 						createjs.Sound.play('fallSound') unless muted
-						startTime = createjs.Ticker.getTime()
-						bird.v.x = 0
+						startTime   = createjs.Ticker.getTime()
+						bird.v.x    = 0
 						bird.pos.y0 = bird.pos.y
 						bird.pos.x0 = bird.pos.x
-						bird.v.y = config.bird.v.y0/2
+						bird.v.y    = config.bird.v.y0/2
 					else
 						gameover()
 				if oldScore < bird.score
@@ -416,7 +391,7 @@ handleTick = () ->
 		when 'gameover'
 			score = Math.floor (currentTime-startTime)/200
 			if score <= bird.score
-				scoreText.text = score
+				scoreText.text        = score
 				scoreTextOutline.text = score
 				stage.update()
 			else
@@ -449,20 +424,19 @@ renderDOM = () ->
 	")
 
 reset = () ->
-
 	createjs.Ticker.setPaused(true)
 	newHighscore = false
-	lastTime = bigbang = createjs.Ticker.getTime()
-	bird.alive = true
-	bird.score = 0
-	bird.pos =
+	lastTime     = bigbang = createjs.Ticker.getTime()
+	bird.alive   = true
+	bird.score   = 0
+	bird.pos     =
 		x : 0
-		x0 : 0
-		y0 : config.stage.height/2
+		x0: 0
+		y0: config.stage.height/2
 		y : config.stage.height/2
 	bird.v =
-		x : config.bird.v.x0
-		y : 0
+		x: config.bird.v.x0
+		y: 0
 	birdView.rotation = 0
 	pipeMan.reset()
 	createjs.Ticker.setPaused(false)

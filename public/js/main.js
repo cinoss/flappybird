@@ -91,7 +91,7 @@ init = function() {
     width: 565 / 5
   };
   config.pixel.size = stage.canvas.height / (config.pipe.gap * 4);
-  config.pixel.size = Math.floor(config.pixel.size * 2) / 2;
+  config.pixel.size = Math.floor(config.pixel.size);
   config.stage.height = stage.canvas.height / config.pixel.size;
   config.stage.width = stage.canvas.width / config.pixel.size;
   config.pipe.num = Math.round(config.stage.width / (config.pipe.distance + config.pipe.width));
@@ -299,10 +299,10 @@ PipeManager = (function() {
       pipe = _ref[_i];
       pipe.screenX = pipe.x - viewportX;
       if (reCache) {
-        pipe.pair.x = (pipe.screenX - this.pipes[0].screenX) * config.pixel.size;
+        pipe.pair.x = Math.round((pipe.screenX - this.pipes[0].screenX) * config.pixel.size);
       }
     }
-    pairContainer.x = this.pipes[0].screenX * config.pixel.size;
+    pairContainer.x = Math.round(this.pipes[0].screenX * config.pixel.size);
     if (reCache) {
       pairContainer.cache(0, 0, this.pipes.length * this.step * config.pixel.size, config.stage.groundY * config.pixel.size);
     }
@@ -399,12 +399,12 @@ handleTick = function() {
       } else {
         wingState = Math.round((currentTime - bigbang) / 60) % 3;
       }
-      birdView.y = bird.pos.y * config.pixel.size;
-      birdView.rotation = angle;
+      birdView.y = Math.round(bird.pos.y * config.pixel.size);
+      birdView.rotation = Math.round(angle);
       birdView.gotoAndStop(wingState);
       if (bird.alive) {
         groundPosition = -(currentTime - bigbang) / 1000 * (config.bird.v.x0 * config.pixel.size);
-        ground.x = groundPosition % (config.stage.groundTileWidth * config.pixel.size);
+        ground.x = Math.round(groundPosition % (config.stage.groundTileWidth * config.pixel.size));
         pipeMan.update(bird.pos.x - config.bird.screenX);
         oldScore = bird.score;
         if (!pipeMan.checkBird()) {
