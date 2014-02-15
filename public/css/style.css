@@ -29,7 +29,9 @@ canvas {
 	z-index: 0;
 }
 #info {
-	font-family: "Courier New", "Lucida Console", Monaco, monospace;
+	/*font-family: "Courier New", "Lucida Console", Monaco, monospace;*/
+	font-size: 10px;
+	color: white;
 	position: absolute;
 	/*top: 300px;*/
 	-webkit-touch-callout: none;
@@ -42,7 +44,7 @@ canvas {
 }
 
 #stage {
-	min-height: 640px;
+	min-height: 320px;
 	margin-left: auto !important;
 	margin-right: auto !important;
 	background: #4ac3ce;

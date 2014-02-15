@@ -61,8 +61,17 @@ status = '';
 
 newHighscore = false;
 
-init = function() {
+init = function(canvas) {
   var ratio;
+  if (canvas.height > canvas.width * 4 / 3) {
+    canvas.height = canvas.width * 4 / 3;
+  }
+  if (canvas.width > canvas.height * 2) {
+    canvas.width = canvas.height * 2;
+  }
+  if (canvas.height > 640) {
+    canvas.height -= 100;
+  }
   config = {};
   config.pixel = {
     size: 3,
@@ -90,10 +99,10 @@ init = function() {
     height: 285 / 5,
     width: 565 / 5
   };
-  config.pixel.size = stage.canvas.height / (config.pipe.gap * 4);
-  config.pixel.size = Math.floor(config.pixel.size);
-  config.stage.height = stage.canvas.height / config.pixel.size;
-  config.stage.width = stage.canvas.width / config.pixel.size;
+  config.pixel.size = canvas.height / (config.pipe.gap * 4.5);
+  config.pixel.size = Math.round(config.pixel.size);
+  config.stage.height = canvas.height / config.pixel.size;
+  config.stage.width = canvas.width / config.pixel.size;
   config.pipe.num = Math.round(config.stage.width / (config.pipe.distance + config.pipe.width));
   config.bird = {
     size: 21,
@@ -181,14 +190,16 @@ main = function() {
   canvas = document.createElement("canvas");
   canvas.height = Math.min($(window).height(), 5500) || 480;
   canvas.width = Math.min($(window).width(), 9000) || 640;
-  canvas.height *= 3 / 4;
-  canvas.height = Math.max(canvas.height, 640);
+  console.log([canvas.height, canvas.width]);
+  init(canvas);
+  console.log([canvas.height, canvas.width]);
+  console.log(12423523);
   $('#stage').append(canvas);
   $('#stage').height(canvas.height);
+  console.log($('#stage').height());
   stage = new createjs.Stage(canvas);
   stage.mouseEnabled = true;
   createjs.Touch.enable(stage);
-  init();
   loadAsset();
   renderText();
   setupTicker();
@@ -386,7 +397,7 @@ handleTick = function() {
       break;
     case 'play':
       t = (currentTime - startTime) / 1000;
-      $('#info').text([Math.round(createjs.Ticker.getMeasuredFPS()) + 'FPS']);
+      $('#info').text([Math.round(createjs.Ticker.getMeasuredFPS()) + ' FPS']);
       lastTime = currentTime;
       bird.pos.y = bird.pos.y0 + bird.v.y * t + 0.5 * config.stage.g * Math.pow(t, 2);
       if (bird.pos.y > config.stage.groundY - config.bird.effectiveRadius) {
