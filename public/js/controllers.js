@@ -351,13 +351,9 @@ flap = function () {
 };
 
 gameOver = function () {
-<<<<<<< HEAD
   if (!muted) {
     hitSound.play();
   }
-=======
-  hitSound.play();
->>>>>>> 1933970318ff319d7f607fec421acb5d4879c03e
   $('#get-ready').css('display', 'none');
   $('#game-over').css('display', 'inherit');
   return $('#score').css('display', 'none');
