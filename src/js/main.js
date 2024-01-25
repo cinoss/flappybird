@@ -238,13 +238,13 @@ export const main = function () {
   canvas = document.createElement("canvas");
   canvas.height = Math.min($(window).height(), 5500) || 480;
   canvas.width = Math.min($(window).width(), 9000) || 640;
-  console.log([canvas.height, canvas.width]);
+  // console.log([canvas.height, canvas.width]);
   init(canvas);
-  console.log([canvas.height, canvas.width]);
-  console.log(12423523);
+  // console.log([canvas.height, canvas.width]);
+  // console.log(12423523);
   $("#stage").append(canvas);
   $("#stage").height(canvas.height);
-  console.log($("#stage").height());
+  // console.log($("#stage").height());
   stage = new createjs.Stage(canvas);
   stage.mouseEnabled = true;
   createjs.Touch.enable(stage);
