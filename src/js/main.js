@@ -1,96 +1,34 @@
 import $ from "jquery";
 
-let
-  PipeManager,
-  background,
-  bigBang,
-  bird,
-  birdView,
-  building,
-  cloud,
-  config,
-  ground,
-  handler,
-  highScoreText,
-  highScoreTextOutline,
-  lastTime,
-  loadQueue,
-  muted,
-  newLabel,
-  pairContainer,
-  pairs,
-  pipeMan,
-  scaleMatrix,
-  scaleRatio,
-  scorePanel,
-  scorePanelContainer,
-  scoreText,
-  scoreTextOutline,
-  scoreView,
-  stage,
-  startButton,
-  startTime,
-  status
-
-
-const FPS = 50;
-
-muted = false;
-
-startTime = 0;
-
-lastTime = bigBang = 0;
-
-config = null;
-
-bird = null;
-
-stage = null;
-
-ground = new createjs.Shape();
-
-building = new createjs.Shape();
-
-cloud = new createjs.Shape();
-
-background = new createjs.Shape();
-
-pairs = [];
-
-pairContainer = new createjs.Container();
-
-birdView = null;
-
-scoreView = null;
-
-startButton = new createjs.Shape();
-
-scorePanel = new createjs.Shape();
-
-scorePanelContainer = new createjs.Container();
-
-scoreText = null;
-
-scoreTextOutline = null;
-
-highScoreText = null;
-
-highScoreTextOutline = null;
-
-newLabel = new createjs.Container();
-
-pipeMan = null;
-
-scaleMatrix = null;
-
-scaleRatio = 1;
-
-loadQueue = new createjs.LoadQueue();
-
-handler = {};
-
-status = "";
-
+const muted = false;
+let startTime = 0;
+let bigBang = 0;
+let lastTime = 0;
+let config = null;
+let bird = null;
+let stage = null;
+const ground = new createjs.Shape();
+const building = new createjs.Shape();
+const cloud = new createjs.Shape();
+const background = new createjs.Shape();
+const pairs = [];
+const pairContainer = new createjs.Container();
+let birdView = null;
+let scoreView = null;
+const startButton = new createjs.Shape();
+const scorePanel = new createjs.Shape();
+const scorePanelContainer = new createjs.Container();
+let scoreText = null;
+let scoreTextOutline = null;
+let highScoreText = null;
+let highScoreTextOutline = null;
+const newLabel = new createjs.Container();
+let pipeMan = null;
+let scaleMatrix = null;
+let scaleRatio = 1;
+const loadQueue = new createjs.LoadQueue();
+const handler = {};
+let status = "";
 let newHighScore = false;
 
 const init = function (canvas) {
@@ -266,9 +204,9 @@ const handleKeyDown = function (e) {
   }
 };
 
-const handleKeyUp = function () { };
+// const handleKeyUp = function () { };
 
-const handleProgress = function (event) { };
+// const handleProgress = function (event) { };
 
 const handleComplete = function (event) {
   addMainView();
@@ -327,8 +265,8 @@ const addMainView = function () {
   stage.update();
 };
 
-PipeManager = (function () {
-  function PipeManager(nextX, step, freePairs) {
+class PipeManager {
+  constructor(nextX, step, freePairs) {
     this.nextX = nextX;
     this.step = step;
     this.freePairs = freePairs;
@@ -336,14 +274,14 @@ PipeManager = (function () {
     this.savedNextX = nextX;
   }
 
-  PipeManager.prototype.reset = function () {
+  reset() {
     while (this.pipes.length) {
       this.freePairs.push(this.pipes.pop().pair);
     }
     this.nextX = this.savedNextX;
   };
 
-  PipeManager.prototype.genPipe = function () {
+  genPipe() {
     var pipe, r;
     r = Math.round(Math.random() * 5) / 5;
     pipe = {
@@ -363,7 +301,7 @@ PipeManager = (function () {
     return pipe;
   };
 
-  PipeManager.prototype.update = function (viewportX) {
+  update(viewportX) {
     var pipe, reCache, _i, _len, _ref;
     reCache = false;
     while (this.freePairs.length > 0) {
@@ -399,7 +337,7 @@ PipeManager = (function () {
     }
   };
 
-  PipeManager.prototype.checkBird = function () {
+  checkBird() {
     var pipe, _i, _len, _ref;
     _ref = this.pipes;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -435,9 +373,7 @@ PipeManager = (function () {
     }
     return true;
   };
-
-  return PipeManager;
-})();
+}
 
 const theta = (dx, dy) => {
   var t;
