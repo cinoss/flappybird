@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta
+      name="google-site-verification"
+      content="N8Y-cfaqvK7N_y7DHyPFt3Zs3BUyiZDng6oPzSaw8LM"
+    />
+    <meta charset="utf-8" />
+    <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
+
+    <meta
+      name="description"
+      content="Free online web app version of Vietnam originated mobile game FlappyBird."
+    />
+
+    <meta
+      property="og:image"
+      content="http://flappybird-online.herokuapp.com/img/logo.jpg"
+    />
+    <meta property="og:title" content="Flappy Bird Online" />
+    <meta
+      property="og:description"
+      content="Free online web app version of Vietnam originated mobile game FlappyBird."
+    />
+    <meta property="og:type" content="game" />
+    <meta property="og:url" content="http://flappybird-online.herokuapp.com/" />
+
+    <meta
+      name="viewport"
+      content="width=device-width, height=device-height, initial-scale=1.0"
+    />
+
+    <title>Flappy Bird Online</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"
+    />
+
+    <link href="./src/css/style.css" rel="stylesheet" />
+  </head>
+  <body onload="main();">
+    <div id="stage">
+      <div id="info"></div>
+      <div id="start"></div>
+      <div id="score" class="big-text"></div>
+    </div>
+    <div id="fb-root"></div>
+    <script>
+      (function (d, s, id) {
+        var js,
+          fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s);
+        js.id = id;
+        js.src =
+          "//connect.facebook.net/en_US/all.js#xfbml=1&appId=266664860031322";
+        fjs.parentNode.insertBefore(js, fjs);
+      })(document, "script", "facebook-jssdk");
+    </script>
+
+    <div class="container">
+      <h1>Flappy Bird Online</h1>
+      <!-- <div>
+        <h4>How far you got?</h4>
+      </div> -->
+    </div>
+    <div class="container">
+      <div
+        class="fb-like"
+        data-href="http://flappybird-online.herokuapp.com/"
+        data-layout="standard"
+        data-action="like"
+        data-show-faces="true"
+        data-share="true"
+      ></div>
+    </div>
+    <div class="container">
+      <div
+        class="fb-comments"
+        data-href="http://flappybird-online.herokuapp.com/"
+        data-width="550"
+        data-numposts="10"
+        data-colorscheme="light"
+      ></div>
+    </div>
+
+    <script src="https://code.createjs.com/createjs-2013.12.12.min.js"></script>
+    <script type="module" src="./src/js/main.js"></script>
+    <script type="module">
+      import { main } from "./src/js/main.js";
+      window.main = main;
+    </script>
+
+    <script>
+      (function (i, s, o, g, r, a, m) {
+        i["GoogleAnalyticsObject"] = r;
+        (i[r] =
+          i[r] ||
+          function () {
+            (i[r].q = i[r].q || []).push(arguments);
+          }),
+          (i[r].l = 1 * new Date());
+        (a = s.createElement(o)), (m = s.getElementsByTagName(o)[0]);
+        a.async = 1;
+        a.src = g;
+        m.parentNode.insertBefore(a, m);
+      })(
+        window,
+        document,
+        "script",
+        "//www.google-analytics.com/analytics.js",
+        "ga"
+      );
+
+      ga("create", "UA-48013740-1", "flappybird-online.herokuapp.com");
+      ga("send", "pageview");
+    </script>
+  </body>
+</html>

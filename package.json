@@ -3,10 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "vite start",
+    "dev": "vite dev",
+    "build": "vite build"
   },
   "dependencies": {
-    "express": "3.4.8",
-    "jade": "*"
+    "jquery": "^3.7.1"
+  },
+  "devDependencies": {
+    "vite": "^5.0.12"
   }
 }
